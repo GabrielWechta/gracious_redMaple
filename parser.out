@@ -1,0 +1,1613 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    COMMENT
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> DECLARE declarations BEGIN commands END
+Rule 2     program -> BEGIN commands END
+Rule 3     declarations -> declarations COMMA PIDENTIFIER
+Rule 4     declarations -> declarations COMMA PIDENTIFIER LPAREN NUM COLON NUM RPAREN
+Rule 5     declarations -> PIDENTIFIER
+Rule 6     declarations -> PIDENTIFIER LPAREN NUM COLON NUM RPAREN
+Rule 7     commands -> commands command
+Rule 8     commands -> command
+Rule 9     command -> identifier ASSGNOP expression SEMICOLON
+Rule 10    command -> IF condition THEN commands ELSE commands ENDIF
+Rule 11    command -> IF condition THEN commands ENDIF
+Rule 12    command -> WHILE condition DO commands ENDWHILE
+Rule 13    command -> REPEAT commands UNTIL condition SEMICOLON
+Rule 14    command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+Rule 15    command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+Rule 16    command -> READ identifier SEMICOLON
+Rule 17    command -> WRITE value SEMICOLON
+Rule 18    expression -> value
+Rule 19    expression -> value PLUS value
+Rule 20    expression -> value MINUS value
+Rule 21    expression -> value TIMES value
+Rule 22    expression -> value DIVIDE value
+Rule 23    expression -> value MODULO value
+Rule 24    condition -> value EQUAL value
+Rule 25    condition -> value NOTEQUAL value
+Rule 26    condition -> value LESSER value
+Rule 27    condition -> value BIGGER value
+Rule 28    condition -> value LESSEREQUAL value
+Rule 29    condition -> value BIGGEREQUAL value
+Rule 30    value -> NUM
+Rule 31    value -> identifier
+Rule 32    identifier -> PIDENTIFIER
+Rule 33    identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+Rule 34    identifier -> PIDENTIFIER LPAREN NUM RPAREN
+
+Terminals, with rules where they appear
+
+ASSGNOP              : 9
+BEGIN                : 1 2
+BIGGER               : 27
+BIGGEREQUAL          : 29
+COLON                : 4 6
+COMMA                : 3 4
+COMMENT              : 
+DECLARE              : 1
+DIVIDE               : 22
+DO                   : 12 14 15
+DOWNTO               : 15
+ELSE                 : 10
+END                  : 1 2
+ENDFOR               : 14 15
+ENDIF                : 10 11
+ENDWHILE             : 12
+EQUAL                : 24
+FOR                  : 14 15
+FROM                 : 14 15
+IF                   : 10 11
+LESSER               : 26
+LESSEREQUAL          : 28
+LPAREN               : 4 6 33 34
+MINUS                : 20
+MODULO               : 23
+NOTEQUAL             : 25
+NUM                  : 4 4 6 6 30 34
+PIDENTIFIER          : 3 4 5 6 14 15 32 33 33 34
+PLUS                 : 19
+READ                 : 16
+REPEAT               : 13
+RPAREN               : 4 6 33 34
+SEMICOLON            : 9 13 16 17
+THEN                 : 10 11
+TIMES                : 21
+TO                   : 14
+UNTIL                : 13
+WHILE                : 12
+WRITE                : 17
+error                : 
+
+Nonterminals, with rules where they appear
+
+command              : 7 8
+commands             : 1 2 7 10 10 11 12 13 14 15
+condition            : 10 11 12 13
+declarations         : 1 3 4
+expression           : 9
+identifier           : 9 16 31
+program              : 0
+value                : 14 14 15 15 17 18 19 19 20 20 21 21 22 22 23 23 24 24 25 25 26 26 27 27 28 28 29 29
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . DECLARE declarations BEGIN commands END
+    (2) program -> . BEGIN commands END
+
+    DECLARE         shift and go to state 2
+    BEGIN           shift and go to state 3
+
+    program                        shift and go to state 1
+
+state 1
+
+    (0) S' -> program .
+
+
+
+state 2
+
+    (1) program -> DECLARE . declarations BEGIN commands END
+    (3) declarations -> . declarations COMMA PIDENTIFIER
+    (4) declarations -> . declarations COMMA PIDENTIFIER LPAREN NUM COLON NUM RPAREN
+    (5) declarations -> . PIDENTIFIER
+    (6) declarations -> . PIDENTIFIER LPAREN NUM COLON NUM RPAREN
+
+    PIDENTIFIER     shift and go to state 5
+
+    declarations                   shift and go to state 4
+
+state 3
+
+    (2) program -> BEGIN . commands END
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 6
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 4
+
+    (1) program -> DECLARE declarations . BEGIN commands END
+    (3) declarations -> declarations . COMMA PIDENTIFIER
+    (4) declarations -> declarations . COMMA PIDENTIFIER LPAREN NUM COLON NUM RPAREN
+
+    BEGIN           shift and go to state 16
+    COMMA           shift and go to state 17
+
+
+state 5
+
+    (5) declarations -> PIDENTIFIER .
+    (6) declarations -> PIDENTIFIER . LPAREN NUM COLON NUM RPAREN
+
+    BEGIN           reduce using rule 5 (declarations -> PIDENTIFIER .)
+    COMMA           reduce using rule 5 (declarations -> PIDENTIFIER .)
+    LPAREN          shift and go to state 18
+
+
+state 6
+
+    (2) program -> BEGIN commands . END
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    END             shift and go to state 19
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 7
+
+    (8) commands -> command .
+
+    END             reduce using rule 8 (commands -> command .)
+    IF              reduce using rule 8 (commands -> command .)
+    WHILE           reduce using rule 8 (commands -> command .)
+    REPEAT          reduce using rule 8 (commands -> command .)
+    FOR             reduce using rule 8 (commands -> command .)
+    READ            reduce using rule 8 (commands -> command .)
+    WRITE           reduce using rule 8 (commands -> command .)
+    PIDENTIFIER     reduce using rule 8 (commands -> command .)
+    UNTIL           reduce using rule 8 (commands -> command .)
+    ELSE            reduce using rule 8 (commands -> command .)
+    ENDIF           reduce using rule 8 (commands -> command .)
+    ENDWHILE        reduce using rule 8 (commands -> command .)
+    ENDFOR          reduce using rule 8 (commands -> command .)
+
+
+state 8
+
+    (9) command -> identifier . ASSGNOP expression SEMICOLON
+
+    ASSGNOP         shift and go to state 21
+
+
+state 9
+
+    (10) command -> IF . condition THEN commands ELSE commands ENDIF
+    (11) command -> IF . condition THEN commands ENDIF
+    (24) condition -> . value EQUAL value
+    (25) condition -> . value NOTEQUAL value
+    (26) condition -> . value LESSER value
+    (27) condition -> . value BIGGER value
+    (28) condition -> . value LESSEREQUAL value
+    (29) condition -> . value BIGGEREQUAL value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    condition                      shift and go to state 22
+    value                          shift and go to state 23
+    identifier                     shift and go to state 25
+
+state 10
+
+    (12) command -> WHILE . condition DO commands ENDWHILE
+    (24) condition -> . value EQUAL value
+    (25) condition -> . value NOTEQUAL value
+    (26) condition -> . value LESSER value
+    (27) condition -> . value BIGGER value
+    (28) condition -> . value LESSEREQUAL value
+    (29) condition -> . value BIGGEREQUAL value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    condition                      shift and go to state 26
+    value                          shift and go to state 23
+    identifier                     shift and go to state 25
+
+state 11
+
+    (13) command -> REPEAT . commands UNTIL condition SEMICOLON
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 27
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 12
+
+    (14) command -> FOR . PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> FOR . PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+
+    PIDENTIFIER     shift and go to state 28
+
+
+state 13
+
+    (32) identifier -> PIDENTIFIER .
+    (33) identifier -> PIDENTIFIER . LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> PIDENTIFIER . LPAREN NUM RPAREN
+
+    ASSGNOP         reduce using rule 32 (identifier -> PIDENTIFIER .)
+    EQUAL           reduce using rule 32 (identifier -> PIDENTIFIER .)
+    NOTEQUAL        reduce using rule 32 (identifier -> PIDENTIFIER .)
+    LESSER          reduce using rule 32 (identifier -> PIDENTIFIER .)
+    BIGGER          reduce using rule 32 (identifier -> PIDENTIFIER .)
+    LESSEREQUAL     reduce using rule 32 (identifier -> PIDENTIFIER .)
+    BIGGEREQUAL     reduce using rule 32 (identifier -> PIDENTIFIER .)
+    SEMICOLON       reduce using rule 32 (identifier -> PIDENTIFIER .)
+    PLUS            reduce using rule 32 (identifier -> PIDENTIFIER .)
+    MINUS           reduce using rule 32 (identifier -> PIDENTIFIER .)
+    TIMES           reduce using rule 32 (identifier -> PIDENTIFIER .)
+    DIVIDE          reduce using rule 32 (identifier -> PIDENTIFIER .)
+    MODULO          reduce using rule 32 (identifier -> PIDENTIFIER .)
+    THEN            reduce using rule 32 (identifier -> PIDENTIFIER .)
+    DO              reduce using rule 32 (identifier -> PIDENTIFIER .)
+    TO              reduce using rule 32 (identifier -> PIDENTIFIER .)
+    DOWNTO          reduce using rule 32 (identifier -> PIDENTIFIER .)
+    LPAREN          shift and go to state 29
+
+
+state 14
+
+    (16) command -> READ . identifier SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    PIDENTIFIER     shift and go to state 13
+
+    identifier                     shift and go to state 30
+
+state 15
+
+    (17) command -> WRITE . value SEMICOLON
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 31
+    identifier                     shift and go to state 25
+
+state 16
+
+    (1) program -> DECLARE declarations BEGIN . commands END
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 32
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 17
+
+    (3) declarations -> declarations COMMA . PIDENTIFIER
+    (4) declarations -> declarations COMMA . PIDENTIFIER LPAREN NUM COLON NUM RPAREN
+
+    PIDENTIFIER     shift and go to state 33
+
+
+state 18
+
+    (6) declarations -> PIDENTIFIER LPAREN . NUM COLON NUM RPAREN
+
+    NUM             shift and go to state 34
+
+
+state 19
+
+    (2) program -> BEGIN commands END .
+
+    $end            reduce using rule 2 (program -> BEGIN commands END .)
+
+
+state 20
+
+    (7) commands -> commands command .
+
+    END             reduce using rule 7 (commands -> commands command .)
+    IF              reduce using rule 7 (commands -> commands command .)
+    WHILE           reduce using rule 7 (commands -> commands command .)
+    REPEAT          reduce using rule 7 (commands -> commands command .)
+    FOR             reduce using rule 7 (commands -> commands command .)
+    READ            reduce using rule 7 (commands -> commands command .)
+    WRITE           reduce using rule 7 (commands -> commands command .)
+    PIDENTIFIER     reduce using rule 7 (commands -> commands command .)
+    UNTIL           reduce using rule 7 (commands -> commands command .)
+    ELSE            reduce using rule 7 (commands -> commands command .)
+    ENDIF           reduce using rule 7 (commands -> commands command .)
+    ENDWHILE        reduce using rule 7 (commands -> commands command .)
+    ENDFOR          reduce using rule 7 (commands -> commands command .)
+
+
+state 21
+
+    (9) command -> identifier ASSGNOP . expression SEMICOLON
+    (18) expression -> . value
+    (19) expression -> . value PLUS value
+    (20) expression -> . value MINUS value
+    (21) expression -> . value TIMES value
+    (22) expression -> . value DIVIDE value
+    (23) expression -> . value MODULO value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    identifier                     shift and go to state 25
+    expression                     shift and go to state 35
+    value                          shift and go to state 36
+
+state 22
+
+    (10) command -> IF condition . THEN commands ELSE commands ENDIF
+    (11) command -> IF condition . THEN commands ENDIF
+
+    THEN            shift and go to state 37
+
+
+state 23
+
+    (24) condition -> value . EQUAL value
+    (25) condition -> value . NOTEQUAL value
+    (26) condition -> value . LESSER value
+    (27) condition -> value . BIGGER value
+    (28) condition -> value . LESSEREQUAL value
+    (29) condition -> value . BIGGEREQUAL value
+
+    EQUAL           shift and go to state 38
+    NOTEQUAL        shift and go to state 39
+    LESSER          shift and go to state 40
+    BIGGER          shift and go to state 41
+    LESSEREQUAL     shift and go to state 42
+    BIGGEREQUAL     shift and go to state 43
+
+
+state 24
+
+    (30) value -> NUM .
+
+    EQUAL           reduce using rule 30 (value -> NUM .)
+    NOTEQUAL        reduce using rule 30 (value -> NUM .)
+    LESSER          reduce using rule 30 (value -> NUM .)
+    BIGGER          reduce using rule 30 (value -> NUM .)
+    LESSEREQUAL     reduce using rule 30 (value -> NUM .)
+    BIGGEREQUAL     reduce using rule 30 (value -> NUM .)
+    SEMICOLON       reduce using rule 30 (value -> NUM .)
+    PLUS            reduce using rule 30 (value -> NUM .)
+    MINUS           reduce using rule 30 (value -> NUM .)
+    TIMES           reduce using rule 30 (value -> NUM .)
+    DIVIDE          reduce using rule 30 (value -> NUM .)
+    MODULO          reduce using rule 30 (value -> NUM .)
+    THEN            reduce using rule 30 (value -> NUM .)
+    DO              reduce using rule 30 (value -> NUM .)
+    TO              reduce using rule 30 (value -> NUM .)
+    DOWNTO          reduce using rule 30 (value -> NUM .)
+
+
+state 25
+
+    (31) value -> identifier .
+
+    EQUAL           reduce using rule 31 (value -> identifier .)
+    NOTEQUAL        reduce using rule 31 (value -> identifier .)
+    LESSER          reduce using rule 31 (value -> identifier .)
+    BIGGER          reduce using rule 31 (value -> identifier .)
+    LESSEREQUAL     reduce using rule 31 (value -> identifier .)
+    BIGGEREQUAL     reduce using rule 31 (value -> identifier .)
+    SEMICOLON       reduce using rule 31 (value -> identifier .)
+    PLUS            reduce using rule 31 (value -> identifier .)
+    MINUS           reduce using rule 31 (value -> identifier .)
+    TIMES           reduce using rule 31 (value -> identifier .)
+    DIVIDE          reduce using rule 31 (value -> identifier .)
+    MODULO          reduce using rule 31 (value -> identifier .)
+    THEN            reduce using rule 31 (value -> identifier .)
+    DO              reduce using rule 31 (value -> identifier .)
+    TO              reduce using rule 31 (value -> identifier .)
+    DOWNTO          reduce using rule 31 (value -> identifier .)
+
+
+state 26
+
+    (12) command -> WHILE condition . DO commands ENDWHILE
+
+    DO              shift and go to state 44
+
+
+state 27
+
+    (13) command -> REPEAT commands . UNTIL condition SEMICOLON
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    UNTIL           shift and go to state 45
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 28
+
+    (14) command -> FOR PIDENTIFIER . FROM value TO value DO commands ENDFOR
+    (15) command -> FOR PIDENTIFIER . FROM value DOWNTO value DO commands ENDFOR
+
+    FROM            shift and go to state 46
+
+
+state 29
+
+    (33) identifier -> PIDENTIFIER LPAREN . PIDENTIFIER RPAREN
+    (34) identifier -> PIDENTIFIER LPAREN . NUM RPAREN
+
+    PIDENTIFIER     shift and go to state 47
+    NUM             shift and go to state 48
+
+
+state 30
+
+    (16) command -> READ identifier . SEMICOLON
+
+    SEMICOLON       shift and go to state 49
+
+
+state 31
+
+    (17) command -> WRITE value . SEMICOLON
+
+    SEMICOLON       shift and go to state 50
+
+
+state 32
+
+    (1) program -> DECLARE declarations BEGIN commands . END
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    END             shift and go to state 51
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 33
+
+    (3) declarations -> declarations COMMA PIDENTIFIER .
+    (4) declarations -> declarations COMMA PIDENTIFIER . LPAREN NUM COLON NUM RPAREN
+
+    BEGIN           reduce using rule 3 (declarations -> declarations COMMA PIDENTIFIER .)
+    COMMA           reduce using rule 3 (declarations -> declarations COMMA PIDENTIFIER .)
+    LPAREN          shift and go to state 52
+
+
+state 34
+
+    (6) declarations -> PIDENTIFIER LPAREN NUM . COLON NUM RPAREN
+
+    COLON           shift and go to state 53
+
+
+state 35
+
+    (9) command -> identifier ASSGNOP expression . SEMICOLON
+
+    SEMICOLON       shift and go to state 54
+
+
+state 36
+
+    (18) expression -> value .
+    (19) expression -> value . PLUS value
+    (20) expression -> value . MINUS value
+    (21) expression -> value . TIMES value
+    (22) expression -> value . DIVIDE value
+    (23) expression -> value . MODULO value
+
+    SEMICOLON       reduce using rule 18 (expression -> value .)
+    PLUS            shift and go to state 55
+    MINUS           shift and go to state 56
+    TIMES           shift and go to state 57
+    DIVIDE          shift and go to state 58
+    MODULO          shift and go to state 59
+
+
+state 37
+
+    (10) command -> IF condition THEN . commands ELSE commands ENDIF
+    (11) command -> IF condition THEN . commands ENDIF
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 60
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 38
+
+    (24) condition -> value EQUAL . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 61
+    identifier                     shift and go to state 25
+
+state 39
+
+    (25) condition -> value NOTEQUAL . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 62
+    identifier                     shift and go to state 25
+
+state 40
+
+    (26) condition -> value LESSER . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 63
+    identifier                     shift and go to state 25
+
+state 41
+
+    (27) condition -> value BIGGER . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 64
+    identifier                     shift and go to state 25
+
+state 42
+
+    (28) condition -> value LESSEREQUAL . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 65
+    identifier                     shift and go to state 25
+
+state 43
+
+    (29) condition -> value BIGGEREQUAL . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 66
+    identifier                     shift and go to state 25
+
+state 44
+
+    (12) command -> WHILE condition DO . commands ENDWHILE
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 67
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 45
+
+    (13) command -> REPEAT commands UNTIL . condition SEMICOLON
+    (24) condition -> . value EQUAL value
+    (25) condition -> . value NOTEQUAL value
+    (26) condition -> . value LESSER value
+    (27) condition -> . value BIGGER value
+    (28) condition -> . value LESSEREQUAL value
+    (29) condition -> . value BIGGEREQUAL value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    condition                      shift and go to state 68
+    value                          shift and go to state 23
+    identifier                     shift and go to state 25
+
+state 46
+
+    (14) command -> FOR PIDENTIFIER FROM . value TO value DO commands ENDFOR
+    (15) command -> FOR PIDENTIFIER FROM . value DOWNTO value DO commands ENDFOR
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 69
+    identifier                     shift and go to state 25
+
+state 47
+
+    (33) identifier -> PIDENTIFIER LPAREN PIDENTIFIER . RPAREN
+
+    RPAREN          shift and go to state 70
+
+
+state 48
+
+    (34) identifier -> PIDENTIFIER LPAREN NUM . RPAREN
+
+    RPAREN          shift and go to state 71
+
+
+state 49
+
+    (16) command -> READ identifier SEMICOLON .
+
+    END             reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    IF              reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    WHILE           reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    REPEAT          reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    FOR             reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    READ            reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    WRITE           reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    PIDENTIFIER     reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    UNTIL           reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    ELSE            reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    ENDIF           reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    ENDWHILE        reduce using rule 16 (command -> READ identifier SEMICOLON .)
+    ENDFOR          reduce using rule 16 (command -> READ identifier SEMICOLON .)
+
+
+state 50
+
+    (17) command -> WRITE value SEMICOLON .
+
+    END             reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    IF              reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    WHILE           reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    REPEAT          reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    FOR             reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    READ            reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    WRITE           reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    PIDENTIFIER     reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    UNTIL           reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    ELSE            reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    ENDIF           reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    ENDWHILE        reduce using rule 17 (command -> WRITE value SEMICOLON .)
+    ENDFOR          reduce using rule 17 (command -> WRITE value SEMICOLON .)
+
+
+state 51
+
+    (1) program -> DECLARE declarations BEGIN commands END .
+
+    $end            reduce using rule 1 (program -> DECLARE declarations BEGIN commands END .)
+
+
+state 52
+
+    (4) declarations -> declarations COMMA PIDENTIFIER LPAREN . NUM COLON NUM RPAREN
+
+    NUM             shift and go to state 72
+
+
+state 53
+
+    (6) declarations -> PIDENTIFIER LPAREN NUM COLON . NUM RPAREN
+
+    NUM             shift and go to state 73
+
+
+state 54
+
+    (9) command -> identifier ASSGNOP expression SEMICOLON .
+
+    END             reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    IF              reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    WHILE           reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    REPEAT          reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    FOR             reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    READ            reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    WRITE           reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    PIDENTIFIER     reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    UNTIL           reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    ELSE            reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    ENDIF           reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    ENDWHILE        reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+    ENDFOR          reduce using rule 9 (command -> identifier ASSGNOP expression SEMICOLON .)
+
+
+state 55
+
+    (19) expression -> value PLUS . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 74
+    identifier                     shift and go to state 25
+
+state 56
+
+    (20) expression -> value MINUS . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 75
+    identifier                     shift and go to state 25
+
+state 57
+
+    (21) expression -> value TIMES . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 76
+    identifier                     shift and go to state 25
+
+state 58
+
+    (22) expression -> value DIVIDE . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 77
+    identifier                     shift and go to state 25
+
+state 59
+
+    (23) expression -> value MODULO . value
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 78
+    identifier                     shift and go to state 25
+
+state 60
+
+    (10) command -> IF condition THEN commands . ELSE commands ENDIF
+    (11) command -> IF condition THEN commands . ENDIF
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    ELSE            shift and go to state 79
+    ENDIF           shift and go to state 80
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 61
+
+    (24) condition -> value EQUAL value .
+
+    THEN            reduce using rule 24 (condition -> value EQUAL value .)
+    DO              reduce using rule 24 (condition -> value EQUAL value .)
+    SEMICOLON       reduce using rule 24 (condition -> value EQUAL value .)
+
+
+state 62
+
+    (25) condition -> value NOTEQUAL value .
+
+    THEN            reduce using rule 25 (condition -> value NOTEQUAL value .)
+    DO              reduce using rule 25 (condition -> value NOTEQUAL value .)
+    SEMICOLON       reduce using rule 25 (condition -> value NOTEQUAL value .)
+
+
+state 63
+
+    (26) condition -> value LESSER value .
+
+    THEN            reduce using rule 26 (condition -> value LESSER value .)
+    DO              reduce using rule 26 (condition -> value LESSER value .)
+    SEMICOLON       reduce using rule 26 (condition -> value LESSER value .)
+
+
+state 64
+
+    (27) condition -> value BIGGER value .
+
+    THEN            reduce using rule 27 (condition -> value BIGGER value .)
+    DO              reduce using rule 27 (condition -> value BIGGER value .)
+    SEMICOLON       reduce using rule 27 (condition -> value BIGGER value .)
+
+
+state 65
+
+    (28) condition -> value LESSEREQUAL value .
+
+    THEN            reduce using rule 28 (condition -> value LESSEREQUAL value .)
+    DO              reduce using rule 28 (condition -> value LESSEREQUAL value .)
+    SEMICOLON       reduce using rule 28 (condition -> value LESSEREQUAL value .)
+
+
+state 66
+
+    (29) condition -> value BIGGEREQUAL value .
+
+    THEN            reduce using rule 29 (condition -> value BIGGEREQUAL value .)
+    DO              reduce using rule 29 (condition -> value BIGGEREQUAL value .)
+    SEMICOLON       reduce using rule 29 (condition -> value BIGGEREQUAL value .)
+
+
+state 67
+
+    (12) command -> WHILE condition DO commands . ENDWHILE
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    ENDWHILE        shift and go to state 81
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 68
+
+    (13) command -> REPEAT commands UNTIL condition . SEMICOLON
+
+    SEMICOLON       shift and go to state 82
+
+
+state 69
+
+    (14) command -> FOR PIDENTIFIER FROM value . TO value DO commands ENDFOR
+    (15) command -> FOR PIDENTIFIER FROM value . DOWNTO value DO commands ENDFOR
+
+    TO              shift and go to state 83
+    DOWNTO          shift and go to state 84
+
+
+state 70
+
+    (33) identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .
+
+    ASSGNOP         reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    EQUAL           reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    NOTEQUAL        reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    LESSER          reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    BIGGER          reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    LESSEREQUAL     reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    BIGGEREQUAL     reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    SEMICOLON       reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    PLUS            reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    MINUS           reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    TIMES           reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    DIVIDE          reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    MODULO          reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    THEN            reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    DO              reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    TO              reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+    DOWNTO          reduce using rule 33 (identifier -> PIDENTIFIER LPAREN PIDENTIFIER RPAREN .)
+
+
+state 71
+
+    (34) identifier -> PIDENTIFIER LPAREN NUM RPAREN .
+
+    ASSGNOP         reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    EQUAL           reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    NOTEQUAL        reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    LESSER          reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    BIGGER          reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    LESSEREQUAL     reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    BIGGEREQUAL     reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    SEMICOLON       reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    PLUS            reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    MINUS           reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    TIMES           reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    DIVIDE          reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    MODULO          reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    THEN            reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    DO              reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    TO              reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+    DOWNTO          reduce using rule 34 (identifier -> PIDENTIFIER LPAREN NUM RPAREN .)
+
+
+state 72
+
+    (4) declarations -> declarations COMMA PIDENTIFIER LPAREN NUM . COLON NUM RPAREN
+
+    COLON           shift and go to state 85
+
+
+state 73
+
+    (6) declarations -> PIDENTIFIER LPAREN NUM COLON NUM . RPAREN
+
+    RPAREN          shift and go to state 86
+
+
+state 74
+
+    (19) expression -> value PLUS value .
+
+    SEMICOLON       reduce using rule 19 (expression -> value PLUS value .)
+
+
+state 75
+
+    (20) expression -> value MINUS value .
+
+    SEMICOLON       reduce using rule 20 (expression -> value MINUS value .)
+
+
+state 76
+
+    (21) expression -> value TIMES value .
+
+    SEMICOLON       reduce using rule 21 (expression -> value TIMES value .)
+
+
+state 77
+
+    (22) expression -> value DIVIDE value .
+
+    SEMICOLON       reduce using rule 22 (expression -> value DIVIDE value .)
+
+
+state 78
+
+    (23) expression -> value MODULO value .
+
+    SEMICOLON       reduce using rule 23 (expression -> value MODULO value .)
+
+
+state 79
+
+    (10) command -> IF condition THEN commands ELSE . commands ENDIF
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 87
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 80
+
+    (11) command -> IF condition THEN commands ENDIF .
+
+    END             reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    IF              reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    WHILE           reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    REPEAT          reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    FOR             reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    READ            reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    WRITE           reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    PIDENTIFIER     reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    UNTIL           reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    ELSE            reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    ENDIF           reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    ENDWHILE        reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+    ENDFOR          reduce using rule 11 (command -> IF condition THEN commands ENDIF .)
+
+
+state 81
+
+    (12) command -> WHILE condition DO commands ENDWHILE .
+
+    END             reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    IF              reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    WHILE           reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    REPEAT          reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    FOR             reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    READ            reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    WRITE           reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    PIDENTIFIER     reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    UNTIL           reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    ELSE            reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    ENDIF           reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    ENDWHILE        reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+    ENDFOR          reduce using rule 12 (command -> WHILE condition DO commands ENDWHILE .)
+
+
+state 82
+
+    (13) command -> REPEAT commands UNTIL condition SEMICOLON .
+
+    END             reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    IF              reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    WHILE           reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    REPEAT          reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    FOR             reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    READ            reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    WRITE           reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    PIDENTIFIER     reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    UNTIL           reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    ELSE            reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    ENDIF           reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    ENDWHILE        reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+    ENDFOR          reduce using rule 13 (command -> REPEAT commands UNTIL condition SEMICOLON .)
+
+
+state 83
+
+    (14) command -> FOR PIDENTIFIER FROM value TO . value DO commands ENDFOR
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 88
+    identifier                     shift and go to state 25
+
+state 84
+
+    (15) command -> FOR PIDENTIFIER FROM value DOWNTO . value DO commands ENDFOR
+    (30) value -> . NUM
+    (31) value -> . identifier
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    NUM             shift and go to state 24
+    PIDENTIFIER     shift and go to state 13
+
+    value                          shift and go to state 89
+    identifier                     shift and go to state 25
+
+state 85
+
+    (4) declarations -> declarations COMMA PIDENTIFIER LPAREN NUM COLON . NUM RPAREN
+
+    NUM             shift and go to state 90
+
+
+state 86
+
+    (6) declarations -> PIDENTIFIER LPAREN NUM COLON NUM RPAREN .
+
+    BEGIN           reduce using rule 6 (declarations -> PIDENTIFIER LPAREN NUM COLON NUM RPAREN .)
+    COMMA           reduce using rule 6 (declarations -> PIDENTIFIER LPAREN NUM COLON NUM RPAREN .)
+
+
+state 87
+
+    (10) command -> IF condition THEN commands ELSE commands . ENDIF
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    ENDIF           shift and go to state 91
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 88
+
+    (14) command -> FOR PIDENTIFIER FROM value TO value . DO commands ENDFOR
+
+    DO              shift and go to state 92
+
+
+state 89
+
+    (15) command -> FOR PIDENTIFIER FROM value DOWNTO value . DO commands ENDFOR
+
+    DO              shift and go to state 93
+
+
+state 90
+
+    (4) declarations -> declarations COMMA PIDENTIFIER LPAREN NUM COLON NUM . RPAREN
+
+    RPAREN          shift and go to state 94
+
+
+state 91
+
+    (10) command -> IF condition THEN commands ELSE commands ENDIF .
+
+    END             reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    IF              reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    WHILE           reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    REPEAT          reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    FOR             reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    READ            reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    WRITE           reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    PIDENTIFIER     reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    UNTIL           reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    ELSE            reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    ENDIF           reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    ENDWHILE        reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+    ENDFOR          reduce using rule 10 (command -> IF condition THEN commands ELSE commands ENDIF .)
+
+
+state 92
+
+    (14) command -> FOR PIDENTIFIER FROM value TO value DO . commands ENDFOR
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 95
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 93
+
+    (15) command -> FOR PIDENTIFIER FROM value DOWNTO value DO . commands ENDFOR
+    (7) commands -> . commands command
+    (8) commands -> . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    commands                       shift and go to state 96
+    command                        shift and go to state 7
+    identifier                     shift and go to state 8
+
+state 94
+
+    (4) declarations -> declarations COMMA PIDENTIFIER LPAREN NUM COLON NUM RPAREN .
+
+    BEGIN           reduce using rule 4 (declarations -> declarations COMMA PIDENTIFIER LPAREN NUM COLON NUM RPAREN .)
+    COMMA           reduce using rule 4 (declarations -> declarations COMMA PIDENTIFIER LPAREN NUM COLON NUM RPAREN .)
+
+
+state 95
+
+    (14) command -> FOR PIDENTIFIER FROM value TO value DO commands . ENDFOR
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    ENDFOR          shift and go to state 97
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 96
+
+    (15) command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands . ENDFOR
+    (7) commands -> commands . command
+    (9) command -> . identifier ASSGNOP expression SEMICOLON
+    (10) command -> . IF condition THEN commands ELSE commands ENDIF
+    (11) command -> . IF condition THEN commands ENDIF
+    (12) command -> . WHILE condition DO commands ENDWHILE
+    (13) command -> . REPEAT commands UNTIL condition SEMICOLON
+    (14) command -> . FOR PIDENTIFIER FROM value TO value DO commands ENDFOR
+    (15) command -> . FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR
+    (16) command -> . READ identifier SEMICOLON
+    (17) command -> . WRITE value SEMICOLON
+    (32) identifier -> . PIDENTIFIER
+    (33) identifier -> . PIDENTIFIER LPAREN PIDENTIFIER RPAREN
+    (34) identifier -> . PIDENTIFIER LPAREN NUM RPAREN
+
+    ENDFOR          shift and go to state 98
+    IF              shift and go to state 9
+    WHILE           shift and go to state 10
+    REPEAT          shift and go to state 11
+    FOR             shift and go to state 12
+    READ            shift and go to state 14
+    WRITE           shift and go to state 15
+    PIDENTIFIER     shift and go to state 13
+
+    command                        shift and go to state 20
+    identifier                     shift and go to state 8
+
+state 97
+
+    (14) command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .
+
+    END             reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    IF              reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    WHILE           reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    REPEAT          reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    FOR             reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    READ            reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    WRITE           reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    PIDENTIFIER     reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    UNTIL           reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    ELSE            reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    ENDIF           reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    ENDWHILE        reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+    ENDFOR          reduce using rule 14 (command -> FOR PIDENTIFIER FROM value TO value DO commands ENDFOR .)
+
+
+state 98
+
+    (15) command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .
+
+    END             reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    IF              reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    WHILE           reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    REPEAT          reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    FOR             reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    READ            reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    WRITE           reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    PIDENTIFIER     reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    UNTIL           reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    ELSE            reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    ENDIF           reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    ENDWHILE        reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+    ENDFOR          reduce using rule 15 (command -> FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR .)
+
