@@ -1,14 +1,8 @@
 import ply.yacc as yacc
 from symbolTable import SymbolTable
+from codeGenerator import Command, transfer_tree_to_code
 
 symbol_table = SymbolTable()
-
-
-class Command:
-    def __init__(self, command_type, index=None):
-        self.type = command_type
-        self.index = index
-        self.commands = []
 
 
 def create_program(commands: Command):
@@ -50,7 +44,7 @@ def create_parent_command(command_type, *children):
 
 
 def create_value_command(command_type, name):
-    if type(name) == int: # TODO for const. Const's name is well... she. Is it good?
+    if type(name) == int:  # TODO for const. Const's name is well... she. Is it good?
         name = str(name)
     index = symbol_table.get(name)
     if index is None:
@@ -246,10 +240,18 @@ BEGIN
 END
 """
 
+testing_data = """
+DECLARE 
+    x, y, z, w(9:11)
+BEGIN
+    x:= y/z;
+END
+"""
+
 result = parser.parse(data)
 print(result)
 
 symbol_table.show()
 
-
-
+intermediate = transfer_tree_to_code(result)
+print(intermediate)

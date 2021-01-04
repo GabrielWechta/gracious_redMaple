@@ -1,16 +1,26 @@
-from parser import Command
+class Command:
+    def __init__(self, command_type, index=None):
+        self.type = command_type
+        self.index = index
+        self.commands = []
 
 
 class codeCommand:
     def __init__(self, cc_type: str, args=None, block=None):
         self.type = cc_type
-        self.args = args
+        self.args = []
         self.block = block
 
 
 class codeProgram:
     def __init__(self):
         self.code_commands = []
+
+    def __str__(self):
+        table = ""
+        for command in self.code_commands:
+            table += command.type + command.args + "\n"
+        return table
 
     def add_code_command(self, cc_type):
         code_command = codeCommand(cc_type)
@@ -26,7 +36,7 @@ class codeProgram:
         else:
             return False
 
-    def switch_condition_ad_current_command(self):
+    def switch_condition_at_current_command(self):
         current_type = self.code_commands[-1].type
 
         if current_type == "CODE_JNEQ":
@@ -43,6 +53,12 @@ class codeProgram:
             self.code_commands[-1].type = "CODE_JLEQ"
         elif current_type == "CODE_JLT":
             self.code_commands[-1].type = "CODE_JGEQ"
+
+    def add_label(self, label_value):
+        code_command = codeCommand("CODE_LABEL")
+        code_command.block = -1
+        code_command.args.append(label_value)
+        self.code_commands.append(code_command)
 
 
 code_program = codeProgram()
@@ -97,8 +113,8 @@ def transform_tree_r(command: Command):
 
     elif command.type == "COM_IF":
         global label
-        label =+ 1
         label_exit = label
+        label += 1
         label_tmp = label_exit
 
         code_program.add_code_command("CODE_UNKNOWN")
@@ -107,10 +123,54 @@ def transform_tree_r(command: Command):
         transform_tree_r(command.commands[0])
 
         if code_program.bad_inequality():
-            code_program.switch_condition_ad_current_command()
+            code_program.switch_condition_at_current_command()
+            label_exit = label
             label += 1
-            label_exit
+            code_program.add_code_command("CODE_JUMP")
+            code_program.add_arg_to_current_command(label_exit)
+            code_program.add_label(label_tmp)
+
+        transform_tree_r(command.commands[1])  # this is happening if true
+        code_program.add_label(label_exit)
+
+    elif command.type == "COM_IFELSE":
+        global label
+        label_else = label
+        label += 1
+        label_exit = label
+        label += 1
+        label_tmp = label_exit
+
+        code_program.add_code_command("CODE_UNKNOWN")
+        code_program.add_arg_to_current_command(label_tmp)
+        code_program.add_arg_to_current_command(-1)
+        transform_tree_r(command.commands[0])
+
+        if code_program.bad_inequality():
+            code_program.switch_condition_at_current_command()
+            label_else = label
+            label += 1
+            code_program.add_code_command("CODE_JUMP")
+            code_program.add_arg_to_current_command(label_else)
+            code_program.add_label(label_tmp)
+
+        transform_tree_r(command.commands[1])  # this is happening if true
+        code_program.add_code_command("CODE_JUMP")
+        code_program.add_arg_to_current_command(label_exit)
+        code_program.add_label(label_else)
+
+        transform_tree_r(command.commands[2])
+        code_program.add_label(label_exit)
+
+    elif command.type == "COM_COMMANDS":
+        for c in command.commands:
+            transform_tree_r(c)
+
+    elif command.type == "COM_PROGRAM":
+        for c in command.commands:
+            transform_tree_r(c)
 
 
 def transfer_tree_to_code(program: Command):
     transform_tree_r(program)
+    return code_program
