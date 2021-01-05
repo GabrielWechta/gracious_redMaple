@@ -414,10 +414,13 @@ BEGIN
     FOR i FROM 20 DOWNTO 10 DO
         x:= y/x;
     ENDFOR
+    FOR i FROM 22 DOWNTO 11 DO
+        x:= y + 3;
+    ENDFOR
 END
 """
 
-result = parser.parse(data)
+result = parser.parse(for_data)
 print(result)
 
 symbol_table.show()
