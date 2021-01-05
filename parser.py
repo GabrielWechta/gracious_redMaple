@@ -52,7 +52,9 @@ def create_parent_command(command_type, *children):
 def create_value_command(command_type, name):
     if type(name) == int:  # TODO for const. Const's name is well... she. Is it good?
         name = str(name)
+
     index = symbol_table.get(name)
+
     if index is None:
         print(f"Variable {name} was not declared.")
         raise Exception
@@ -60,6 +62,25 @@ def create_value_command(command_type, name):
         value_command = Command(command_type, index)
 
     return value_command
+
+
+def create_iterator_command(command_type, name):
+    index = symbol_table.get(name)
+
+    if index is not None and symbol_table.dict[index][1] != "ITERATOR":
+        print(f"Iterator {name} was declared as VAR or ARR before.")
+        raise Exception
+
+    elif index is not None and symbol_table.dict[index][1] == "ITERATOR":
+        new_index = symbol_table.get(name)
+        iterator_command = Command(command_type, new_index)
+        return iterator_command
+
+    elif index is None:
+        symbol_table.add(name, "ITERATOR")
+        new_index = symbol_table.get(name)
+        iterator_command = Command(command_type, new_index)
+        return iterator_command
 
 
 def create_empty_command(command_type):
@@ -135,16 +156,19 @@ def p_command(p):
         p[0] = create_parent_command("COM_ASSGNOP", p[1], p[3])
     elif p[1] == "IF" and p[5] == "ELSE":
         p[0] = create_parent_command("COM_IFELSE", p[2], p[4], p[6])
-    elif p[2] == "IF" and not p[5] == "ELSE":
+    elif p[1] == "IF" and not p[5] == "ELSE":
         p[0] = create_parent_command("COM_IF", p[2], p[4])
     elif p[1] == "WHILE":
         p[0] = create_parent_command("COM_WHILE", p[2], p[4])
     elif p[1] == "REPEAT":
         p[0] = create_parent_command("COM_REPEAT", p[2], p[4])
     elif p[1] == "FOR" and not p[5] == "DOWNTO":
-        p[0] = create_parent_command("COM_FOR", create_value_command("COM_PID", p[2]), p[4], p[6], p[8])  # TODO
+        p[0] = create_parent_command("COM_FOR", create_iterator_command("COM_PID", p[2]),
+                                     create_iterator_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6],
+                                     p[8])  # TODO maybe fake iter name should be something like '9i'
     elif p[1] == "FOR" and p[5] == "DOWNTO":
-        p[0] = create_parent_command("COM_FORDOWN", create_value_command("COM_PID", p[2]), p[4], p[6], p[8])
+        p[0] = create_parent_command("COM_FORDOWN", create_iterator_command("COM_PID", p[2]),
+                                     create_iterator_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6], p[8])
     elif p[1] == "READ":
         p[0] = create_parent_command("COM_READ", p[2])
     elif p[1] == "WRITE":
@@ -209,8 +233,7 @@ def p_value_identifier(p):
 
 def p_identifier_pidentifier(p):
     """identifier   : PIDENTIFIER
-                    | PIDENTIFIER LPAREN PIDENTIFIER RPAREN
-                    | PIDENTIFIER LPAREN NUM RPAREN"""
+                    | PIDENTIFIER LPAREN PIDENTIFIER RPAREN"""
 
     if len(p) == 2:
         p[0] = create_value_command("COM_PID", p[1])
@@ -220,6 +243,8 @@ def p_identifier_pidentifier(p):
 
 
 def p_identifier_num(p):
+    """identifier   : PIDENTIFIER LPAREN NUM RPAREN"""
+
     p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
                                  create_value_command("COM_NUM", p[3]))
 

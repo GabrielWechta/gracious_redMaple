@@ -54,6 +54,9 @@ class codeProgram:
     def set_type_of_current_command(self, cc_type):
         self.code_commands[-1].type = cc_type
 
+    def change_jump_destination_at_current_command(self, dest):
+        self.code_commands[-1].args[0] = dest
+
     def add_label(self, label_value):
         code_command = codeCommand("CODE_LABEL")
         code_command.block = -1
@@ -140,7 +143,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_UNKNOWN")
         code_program.add_arg_to_current_command(label_tmp)
-        code_program.add_arg_to_current_command(-1)
+        code_program.add_arg_to_current_command(-1)  # ?
         transform_tree_r(command.commands[0])
 
         if code_program.bad_inequality():
@@ -169,7 +172,7 @@ def transform_tree_r(command: Command):
         code_program.add_label(label_start)
         code_program.add_code_command("CODE_UNKNOWN")
         code_program.add_arg_to_current_command(label_tmp)
-        code_program.add_arg_to_current_command(-1)
+        code_program.add_arg_to_current_command(-1)  # ?
         transform_tree_r(command.commands[0])
 
         if code_program.bad_inequality():
@@ -185,17 +188,150 @@ def transform_tree_r(command: Command):
         code_program.add_arg_to_current_command(label_start)
         code_program.add_label(label_exit)
 
+    elif command.type == "COM_REPEAT":
+        label_start = code_program.label
+        code_program.label += 1
+
+        code_program.add_label(label_start)
+
+        transform_tree_r(command.commands[0])
+
+        code_program.add_code_command("CODE_UNKNOWN")
+        code_program.add_arg_to_current_command(label_start)
+        code_program.add_arg_to_current_command(-1)
+        transform_tree_r(command.commands[1])
+
+        if code_program.bad_inequality():
+            code_program.switch_condition_at_current_command()
+            label_exit = code_program.label
+            code_program.label += 1
+            code_program.change_jump_destination_at_current_command(label_exit)
+            code_program.add_code_command("CODE_JUMP")
+            code_program.add_arg_to_current_command(label_start)
+            code_program.add_label(label_exit)
+
+    elif command.type == "COM_FOR":
+        label_start = code_program.label
+        code_program.label += 1
+        label_exit = code_program.label
+        code_program.label += 1
+
+        code_program.add_code_command("CODE_COPY")
+        transform_tree_r(command.commands[0])
+        transform_tree_r(command.commands[2])
+
+        code_program.add_code_command("CODE_COPY")
+        transform_tree_r(command.commands[1])
+        transform_tree_r(command.commands[3])
+
+        code_program.add_code_command("CODE_INC")
+        transform_tree_r(command.commands[1])
+
+        code_program.add_code_command("CODE_SUB")
+        transform_tree_r(command.commands[1])
+        transform_tree_r(command.commands[1])
+        transform_tree_r(command.commands[2])
+
+        code_program.add_label(label_start)
+
+        code_program.add_code_command("CODE_JZERO")
+        code_program.add_arg_to_current_command(label_exit)
+        code_program.add_arg_to_current_command(-1)
+        transform_tree_r(command.commands[1])
+
+        transform_tree_r(command.commands[4])
+
+        code_program.add_code_command("CODE_INC")
+        transform_tree_r(command.commands[0])
+
+        code_program.add_code_command("CODE_DEC")
+        transform_tree_r(command.commands[1])
+
+        code_program.add_code_command("CODE_JUMP")
+        code_program.add_arg_to_current_command(label_start)
+
+        code_program.add_label(label_exit)
+
+    elif command.type == "COM_FORDOWN":
+        label_start = code_program.label
+        code_program.label += 1
+        label_exit = code_program.label
+        code_program.label += 1
+
+        code_program.add_code_command("CODE_COPY")
+        transform_tree_r(command.commands[0])
+        transform_tree_r(command.commands[2])
+
+        code_program.add_code_command("CODE_COPY")
+        transform_tree_r(command.commands[1])
+        transform_tree_r(command.commands[2])
+
+        code_program.add_code_command("CODE_INC")
+        transform_tree_r(command.commands[1])
+
+        code_program.add_code_command("CODE_SUB")
+        transform_tree_r(command.commands[1])
+        transform_tree_r(command.commands[1])
+        transform_tree_r(command.commands[3])
+
+        code_program.add_label(label_start)
+
+        code_program.add_code_command("CODE_JZERO")
+        code_program.add_arg_to_current_command(label_exit)
+        code_program.add_arg_to_current_command(-1)
+        transform_tree_r(command.commands[1])
+
+        transform_tree_r(command.commands[4])
+
+        code_program.add_code_command("CODE_DEC")
+        transform_tree_r(command.commands[0])
+
+        code_program.add_code_command("CODE_DEC")
+        transform_tree_r(command.commands[1])
+
+        code_program.add_code_command("CODE_JUMP")
+        code_program.add_arg_to_current_command(label_start)
+
+        code_program.add_label(label_exit)
+
+
     elif command.type == "COM_EQ":
         code_program.set_type_of_current_command("CODE_JNEQ")
         transform_tree_r(command.commands[0])
         transform_tree_r(command.commands[1])
-
 
     elif command.type == "COM_NEQ":
         code_program.set_type_of_current_command("CODE_JEQ")
         transform_tree_r(command.commands[0])
         transform_tree_r(command.commands[1])
 
+    elif command.type == "COM_LT":
+        code_program.set_type_of_current_command("CODE_JGEQ")
+        transform_tree_r(command.commands[0])
+        transform_tree_r(command.commands[1])
+
+    elif command.type == "COM_GT":
+        code_program.set_type_of_current_command("CODE_JLEQ")
+        transform_tree_r(command.commands[0])
+        transform_tree_r(command.commands[1])
+
+    elif command.type == "COM_LEQ":
+        code_program.set_type_of_current_command("CODE_JGT")
+        transform_tree_r(command.commands[0])
+        transform_tree_r(command.commands[1])
+
+    elif command.type == "COM_GEQ":
+        code_program.set_type_of_current_command("CODE_JLT")
+        transform_tree_r(command.commands[0])
+        transform_tree_r(command.commands[1])
+
+    elif command.type == "COM_READ":
+        code_program.add_code_command("CODE_READ")
+        transform_tree_r(command.commands[0])
+
+    elif command.type == "COM_WRITE":
+        code_program.add_code_command("CODE_WRITE")
+        transform_tree_r(command.commands[0])
 
     elif command.type == "COM_COMMANDS":
         for c in command.commands:
@@ -219,7 +355,7 @@ BEGIN
     REPEAT
         [wdwdds ]
         p:=n/2;
-        p:=2*p;
+        p(n):=2*p;
         IF n>=p THEN 
             WRITE 1;
         ELSE 
@@ -237,14 +373,51 @@ BEGIN
     y:=14;
     IF x = y THEN
         z:= x - y;
+        z:= y;
     ELSE
         z:= y - x ;
+    ENDIF
+    x:=y/2;
+    x:=y/3;
+    IF x = 5 THEN
+        z:= x - y;
+        z:= y;
     ENDIF
 END
 """
 
+while_data = """
+DECLARE 
+    x, y, z, w(9:11)
+BEGIN
+    WHILE x < 4 DO 
+        x:= y + 2;
+    ENDWHILE
+END
+"""
 
-result = parser.parse(testing_data)
+repeat_data = """
+DECLARE 
+    x, y, z, w(9:11)
+BEGIN
+    REPEAT
+        z:=y; 
+        x:= y + 2;
+    UNTIL x = 100;
+END
+"""
+
+for_data = """
+DECLARE 
+    x, y, z, w(9:11)
+BEGIN
+    FOR i FROM 20 DOWNTO 10 DO
+        x:= y/x;
+    ENDFOR
+END
+"""
+
+result = parser.parse(data)
 print(result)
 
 symbol_table.show()

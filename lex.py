@@ -33,6 +33,9 @@ def t_ENDIF(t):
 def t_WHILE(t):
     r'WHILE'
     return t
+def t_DOWNTO(t):
+    r'DOWNTO'
+    return t
 def t_DO(t):
     r'DO'
     return t
@@ -56,9 +59,6 @@ def t_TO(t):
     return t
 def t_ENDFOR(t):
     r'ENDFOR'
-    return t
-def t_DOWNTO(t):
-    r'DOWNTO'
     return t
 def t_READ(t):
     r'READ'

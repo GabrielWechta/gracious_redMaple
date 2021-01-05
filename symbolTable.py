@@ -15,5 +15,6 @@ class SymbolTable:
             return None
 
     def show(self):
+        print("i: name: type: value: begin: end: offset")
         for key, value in self.dict.items():
             print(key, value)
