@@ -371,9 +371,25 @@ testing_data = """
 DECLARE 
     x, y, p(2:9)
 BEGIN
+    x:=2;
+    x:=y;
     x:=p(3);
+    x:=p(y);
+    p(6):=2;
+    p(6):=y;
+    p(6):=p(3);
+    p(6):=p(y);
+    x:=3
+    p(x):=2;
+    p(x):=y;
+    p(x):=p(3);
+    p(x):=p(y);
+    x:=1 + 2;
     x:= 1 + p(y);
     x:= p(3) + p(y);
+    p(6):= 1 + 2;
+    p(6):= 1 + p(y);
+    p(6):= p(3) + p(y);
 
     WRITE y;
 END
@@ -389,10 +405,45 @@ BEGIN
 END
 """
 
-result = parser.parse(test_data)
+add_test = """
+DECLARE 
+    x, y, p(7:9)
+BEGIN
+    x:= 1 + 2;
+    x:= 1 + p(8);
+    x:= p(8) + 3;
+    x:= p(8) + p(9);
+END
+"""
+
+min_test = """
+DECLARE 
+    x, y, p(7:9)
+BEGIN
+    x:= 1 - 2;
+    x:= 1 - p(8);
+    x:= p(8) - 3;
+    x:= p(8) - p(9);
+END
+"""
+
+first_test = """
+DECLARE 
+    x,y,p(8:12)
+BEGIN
+    p(9):=123;
+    p(10):=1;
+    x:= 9;
+    y:=10;
+    p(x):=p(y);
+    WRITE p(9);
+END
+"""
+result = parser.parse(first_test)
 # print(result)
 
 # symbol_table.show()
 
 intermediate = transfer_tree_to_code(result)
+intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
 print(intermediate)

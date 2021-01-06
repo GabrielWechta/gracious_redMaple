@@ -30,6 +30,13 @@ class SymbolTable:
             print("no such a symbol in symbol table", file=sys.stderr)
             raise Exception
 
+    def get_type_by_index(self, index):
+        try:
+            return self.dict[index][1]
+        except:
+            print("no such a symbol in symbol table", file=sys.stderr)
+            raise Exception
+
 
     def show(self):
         print("i: name: type: value: begin: end: offset")
