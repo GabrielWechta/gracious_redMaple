@@ -23,7 +23,7 @@ def set_variable(name):
 
 
 def set_const(name):
-    symbol_table.add(name, "CONST")
+    symbol_table.add(name, "CONST", int(name))
 
 
 def set_array(name, begin, end):
@@ -237,7 +237,7 @@ def p_identifier_pidentifier(p):
 
     if len(p) == 2:
         p[0] = create_value_command("COM_PID", p[1])
-    elif len(p) == 4:
+    elif len(p) == 5:
         p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
                                      create_value_command("COM_PID", p[3]))
 
@@ -245,6 +245,8 @@ def p_identifier_pidentifier(p):
 def p_identifier_num(p):
     """identifier   : PIDENTIFIER LPAREN NUM RPAREN"""
 
+    if symbol_table.get(str(p[3])) is None:
+        set_const(str(p[3]))
     p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
                                  create_value_command("COM_NUM", p[3]))
 

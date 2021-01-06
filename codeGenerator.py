@@ -71,8 +71,6 @@ def transform_tree_r(command: Command):
     if not command:  # to check
         return
 
-    label_exit, label_else, label_start, label_tmp = 0, 0, 0, 0
-
     if command.type == "COM_ASSGNOP":
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
@@ -80,13 +78,16 @@ def transform_tree_r(command: Command):
 
     elif command.type == "COM_NUM":
         code_program.add_arg_to_current_command(command.index)
+        # code_program.add_arg_to_current_command(None)
 
     elif command.type == "COM_PID":
         code_program.add_arg_to_current_command(command.index)
+        # code_program.add_arg_to_current_command(None)
 
     elif command.type == "COM_ARR":
-        code_program.add_arg_to_current_command(command.commands[0])
-        code_program.add_arg_to_current_command(command.commands[1])
+        # code_program.add_code_command("CODE_ARR")
+        code_program.add_arg_to_current_command(command.commands[0].index)
+        code_program.add_arg_to_current_command(command.commands[1].index)
 
     elif command.type == "COM_ADD":
         code_program.add_code_command("CODE_ADD")
@@ -355,7 +356,7 @@ BEGIN
     REPEAT
         [wdwdds ]
         p:=n/2;
-        p(n):=2*p;
+        p:=2*p;
         IF n>=p THEN 
             WRITE 1;
         ELSE 
@@ -365,65 +366,33 @@ BEGIN
     UNTIL n=0;
 END
 """
+
 testing_data = """
 DECLARE 
-    x, y, z, w(9:11)
+    x, y, p(2:9)
 BEGIN
-    x:=12;
-    y:=14;
-    IF x = y THEN
-        z:= x - y;
-        z:= y;
-    ELSE
-        z:= y - x ;
-    ENDIF
-    x:=y/2;
-    x:=y/3;
-    IF x = 5 THEN
-        z:= x - y;
-        z:= y;
-    ENDIF
+    x:=p(3);
+    x:= 1 + p(y);
+    x:= p(3) + p(y);
+
+    WRITE y;
 END
 """
 
-while_data = """
+test_data = """
 DECLARE 
-    x, y, z, w(9:11)
+    x, y, p(2:9)
 BEGIN
-    WHILE x < 4 DO 
-        x:= y + 2;
-    ENDWHILE
-END
-"""
-
-repeat_data = """
-DECLARE 
-    x, y, z, w(9:11)
-BEGIN
-    REPEAT
-        z:=y; 
-        x:= y + 2;
-    UNTIL x = 100;
-END
-"""
-
-for_data = """
-DECLARE 
-    x, y, z, w(9:11)
-BEGIN
-    FOR i FROM 20 DOWNTO 10 DO
-        x:= y/x;
-    ENDFOR
-    FOR i FROM 22 DOWNTO 11 DO
-        x:= y + 3;
+    FOR i FROM p(3) TO 40 DO
+        x:=2;
     ENDFOR
 END
 """
 
-result = parser.parse(for_data)
-print(result)
+result = parser.parse(test_data)
+# print(result)
 
-symbol_table.show()
+# symbol_table.show()
 
 intermediate = transfer_tree_to_code(result)
 print(intermediate)
