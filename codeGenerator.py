@@ -399,7 +399,7 @@ test_data = """
 DECLARE 
     x, y, p(2:9)
 BEGIN
-    FOR i FROM p(3) TO 40 DO
+    FOR i FROM 4 TO 40 DO
         x:=2;
     ENDFOR
 END
@@ -427,6 +427,16 @@ BEGIN
 END
 """
 
+if_test = """
+DECLARE 
+    x,y,p(8:12)
+BEGIN
+    IF x < 5 THEN
+        x:= 2;
+    ENDIF
+END
+"""
+
 first_test = """
 DECLARE 
     x,y,p(8:12)
@@ -439,7 +449,36 @@ BEGIN
     WRITE p(9);
 END
 """
-result = parser.parse(first_test)
+
+stupid_test = """
+DECLARE 
+    x,y,w(1:3)
+BEGIN
+    w(2):=4;
+    w(3):=5;
+    y:=2;
+    x:=3;
+    w(x):=w(x) - w(y);
+    x:=w(x);
+    x:= x + 1;
+    WRITE w(x);
+END
+"""
+
+stupid_test_2 = """
+DECLARE 
+    x,y,w(10:30)
+BEGIN
+    w(15):= 12;
+    WRITE w(15);
+    READ w(15);
+    WRITE w(15);
+    x:=16;
+    READ w(x);
+    WRITE w(x);
+END
+"""
+result = parser.parse(if_test)
 # print(result)
 
 # symbol_table.show()
@@ -447,3 +486,5 @@ result = parser.parse(first_test)
 intermediate = transfer_tree_to_code(result)
 intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
 print(intermediate)
+
+

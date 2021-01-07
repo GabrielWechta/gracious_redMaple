@@ -4,7 +4,7 @@ class SymbolTable:
     def __init__(self):
         self.dict = {}
         self.local_index = 0
-        self.offset_pointer = 0
+        self.offset_pointer = 1
 
     def add(self, name, symbol_type, value=None, begin=None, end=None, offset=None):
         self.dict[self.local_index] = [name, symbol_type, value, begin, end, self.offset_pointer]
