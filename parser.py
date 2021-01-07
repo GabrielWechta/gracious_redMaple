@@ -163,11 +163,13 @@ def p_command(p):
     elif p[1] == "REPEAT":
         p[0] = create_parent_command("COM_REPEAT", p[2], p[4])
     elif p[1] == "FOR" and not p[5] == "DOWNTO":
-        p[0] = create_parent_command("COM_FOR", create_iterator_command("COM_PID", p[2]),
+        set_variable(p[2])
+        p[0] = create_parent_command("COM_FOR", create_value_command("COM_PID", p[2]),
                                      create_iterator_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6],
                                      p[8])  # TODO maybe fake iter name should be something like '9i'
     elif p[1] == "FOR" and p[5] == "DOWNTO":
-        p[0] = create_parent_command("COM_FORDOWN", create_iterator_command("COM_PID", p[2]),
+        set_variable(p[2])
+        p[0] = create_parent_command("COM_FORDOWN", create_value_command("COM_PID", p[2]),
                                      create_iterator_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6], p[8])
     elif p[1] == "READ":
         p[0] = create_parent_command("COM_READ", p[2])
@@ -236,8 +238,10 @@ def p_identifier_pidentifier(p):
                     | PIDENTIFIER LPAREN PIDENTIFIER RPAREN"""
 
     if len(p) == 2:
+        set_variable(p[1]) # TODO
         p[0] = create_value_command("COM_PID", p[1])
     elif len(p) == 5:
+        set_variable(p[3]) # TODO
         p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
                                      create_value_command("COM_PID", p[3]))
 

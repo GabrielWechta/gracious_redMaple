@@ -22,11 +22,11 @@ class assemblerGenerator:
         self.asm_commands.append(ac)
 
     def add_asm_reg_jump(self, ac_type, reg1, dest):
-        ac = assemblerCommand(ac_type, reg1, dest)
+        ac = assemblerCommand(ac_type, reg1, str(dest))
         self.asm_commands.append(ac)
 
     def add_asm_jump(self, ac_type, dest):
-        ac = assemblerCommand(ac_type, dest)
+        ac = assemblerCommand(ac_type, str(dest))
         self.asm_commands.append(ac)
 
     def add_comment(self, comment):
@@ -197,7 +197,6 @@ def load_all_kind_to_one_reg(register, *arguments):
                 load_var_from_array_with_variable_to_reg(register, arguments[0], arguments[1])
 
 
-# TODO iterator...
 def translate_to_asm():
     for code_command, next_command in zip(intermediate.code_commands, intermediate.code_commands[1:]):
         if next_command.type == "CODE_ADD":
@@ -219,6 +218,25 @@ def translate_to_asm():
 
             assembler_generator.add_asm_one_reg("RESET", "b")
             assembler_generator.add_asm_two_reg("STORE", "a", "b")  # safely saved in 0-offset for copy to pick it up.
+            """ for printing offset 0 do:"""
+            # assembler_generator.add_asm_one_reg("PUT", "b")
+
+        if next_command.type == "CODE_MUL":
+            load_all_kinds_to_regs("a", "b", next_command.args)
+            # TODO optimize chyba będzie lepiej jak a>b albo na odwrót
+            # TODO lewy i prawa to trudne rzeczy
+            #### MULTIPLYING #####
+            assembler_generator.add_asm_one_reg("RESET", "c")
+            assembler_generator.add_asm_reg_jump("JODD", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", 2)
+            assembler_generator.add_asm_two_reg("ADD", "c", "a")
+            assembler_generator.add_asm_one_reg("SHL", "a")
+            assembler_generator.add_asm_one_reg("SHR", "b")
+            assembler_generator.add_asm_reg_jump("JZERO", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", -6)
+
+            assembler_generator.add_asm_one_reg("RESET", "b")
+            assembler_generator.add_asm_two_reg("STORE", "c", "b")  # safely saved in 0-offset for copy to pick it up.
             """ for printing offset 0 do:"""
             # assembler_generator.add_asm_one_reg("PUT", "b")
 
@@ -436,6 +454,7 @@ def translate_to_asm():
                 assembler_generator.add_asm_two_reg("LOAD", "d", "d")
                 assembler_generator.add_asm_two_reg("STORE", "d", "c")
 
+        # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
         elif code_command.type == "CODE_WRITE":
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
                 index = code_command.args[0]
@@ -471,7 +490,6 @@ def translate_to_asm():
                 assembler_generator.add_asm_two_reg("ADD", "c", "b")  # now in c is relative address
 
                 assembler_generator.add_asm_one_reg("PUT", "c")
-
 
         elif code_command.type == "CODE_READ":
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
