@@ -453,9 +453,47 @@ BEGIN
     WRITE x;
 END
 """
+div_test = """
+DECLARE 
+    x
+BEGIN
+    y:= 14;
+    x:=y/4;
+    WRITE x;
+    x:=y/x;
+    WRITE x;
+    x:=y/14;
+    WRITE x;
+    x:=y/0;
+    WRITE x;
+    x:=y/15;
+    WRITE x;
+    x:=0/0;
+    WRITE x;
+END
+"""
 
+mod_test = """
+DECLARE 
+    x
+BEGIN
+    y:= 14;
+    x:=y%4;
+    WRITE x;
+    x:=y%x;
+    WRITE x;
+    x:=y%14;
+    WRITE x;
+    x:=y%0;
+    WRITE x;
+    x:=y%15;
+    WRITE x;
+    x:=0%0;
+    WRITE x;
+END
+"""
 
-result = parser.parse(inc_test)
+result = parser.parse(div_test)
 # print(result)
 
 # symbol_table.show()

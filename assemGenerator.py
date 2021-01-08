@@ -125,6 +125,12 @@ def get_offset_from_array(array_id, parameter_id):
     else:
         pass  # TODO
 
+def copy_reg_value_to_reg(reg_to, reg_from):
+    """THIS FUNCTION USES REGISTER a !!!"""
+    assembler_generator.add_asm_one_reg("RESET", "a") # offset = 0 is save place (I hope)
+    assembler_generator.add_asm_two_reg("STORE", reg_from, "a")
+    assembler_generator.add_asm_two_reg("LOAD", reg_to, "a")
+
 
 def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
     """Loads value to left reg and value to right reg despite type of expression"""
@@ -239,6 +245,91 @@ def translate_to_asm():
             assembler_generator.add_asm_two_reg("STORE", "c", "b")  # safely saved in 0-offset for copy to pick it up.
             """ for printing offset 0 do:"""
             # assembler_generator.add_asm_one_reg("PUT", "b")
+
+        if next_command.type == "CODE_DIV":
+            load_all_kinds_to_regs("d", "c", next_command.args)
+
+            ### DIVISION ALGORITHM ###
+            # assembler_generator.add_comment("# div begins ")
+            assembler_generator.add_asm_one_reg("RESET", "b")
+            assembler_generator.add_asm_reg_jump("JZERO", "c", 30)
+
+            copy_reg_value_to_reg("e", "c")
+            copy_reg_value_to_reg("b", "e")
+
+            assembler_generator.add_asm_two_reg("SUB", "b", "d")
+            assembler_generator.add_asm_reg_jump("JZERO", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", 3)
+            assembler_generator.add_asm_two_reg("ADD", "e", "e")
+            assembler_generator.add_asm_jump("JUMP", -7)
+
+            assembler_generator.add_asm_one_reg("RESET", "b")
+
+            copy_reg_value_to_reg("f", "e")
+
+            assembler_generator.add_asm_two_reg("SUB", "f", "d")
+            assembler_generator.add_asm_reg_jump("JZERO", "f", 4)
+            assembler_generator.add_asm_two_reg("ADD", "b", "b")
+            assembler_generator.add_asm_one_reg("SHR", "e")
+            assembler_generator.add_asm_jump("JUMP", 5)
+            assembler_generator.add_asm_two_reg("ADD", "b", "b")
+            assembler_generator.add_asm_one_reg("INC", "b")
+            assembler_generator.add_asm_two_reg("SUB", "d", "e")
+            assembler_generator.add_asm_one_reg("SHR", "e")
+
+            copy_reg_value_to_reg("f", "c")
+
+            assembler_generator.add_asm_two_reg("SUB", "f", "e")
+            assembler_generator.add_asm_reg_jump("JZERO", "f", -16)
+
+            # assembler_generator.add_comment("# div ends")
+
+            assembler_generator.add_asm_one_reg("RESET", "a")
+            assembler_generator.add_asm_two_reg("STORE", "b", "a")  # safely saved in 0-offset for copy to pick it up.
+
+        if next_command.type == "CODE_MOD":
+            load_all_kinds_to_regs("d", "c", next_command.args)
+
+            ### DIVISION ALGORITHM ###
+            # assembler_generator.add_comment("# modulo begins ")
+            assembler_generator.add_asm_reg_jump("JZERO", "c", 32)
+            assembler_generator.add_asm_reg_jump("JZERO", "c", 30)
+
+            copy_reg_value_to_reg("e", "c")
+            copy_reg_value_to_reg("b", "e")
+
+            assembler_generator.add_asm_two_reg("SUB", "b", "d")
+            assembler_generator.add_asm_reg_jump("JZERO", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", 3)
+            assembler_generator.add_asm_two_reg("ADD", "e", "e")
+            assembler_generator.add_asm_jump("JUMP", -7)
+
+            assembler_generator.add_asm_one_reg("RESET", "b")
+
+            copy_reg_value_to_reg("f", "e")
+
+            assembler_generator.add_asm_two_reg("SUB", "f", "d")
+            assembler_generator.add_asm_reg_jump("JZERO", "f", 4)
+            assembler_generator.add_asm_two_reg("ADD", "b", "b")
+            assembler_generator.add_asm_one_reg("SHR", "e")
+            assembler_generator.add_asm_jump("JUMP", 5)
+            assembler_generator.add_asm_two_reg("ADD", "b", "b")
+            assembler_generator.add_asm_one_reg("INC", "b")
+            assembler_generator.add_asm_two_reg("SUB", "d", "e")
+            assembler_generator.add_asm_one_reg("SHR", "e")
+
+            copy_reg_value_to_reg("f", "c")
+
+            assembler_generator.add_asm_two_reg("SUB", "f", "e")
+            assembler_generator.add_asm_reg_jump("JZERO", "f", -16)
+            assembler_generator.add_asm_jump("JUMP", 2)
+            assembler_generator.add_asm_one_reg("RESET", "d")
+            copy_reg_value_to_reg("b", "d")
+
+            # assembler_generator.add_comment("# modulo ends")
+
+            assembler_generator.add_asm_one_reg("RESET", "a")
+            assembler_generator.add_asm_two_reg("STORE", "d", "a")  # safely saved in 0-offset for copy to pick it up.
 
         if code_command.type == "CODE_COPY":
             copy_arguments = code_command.args
