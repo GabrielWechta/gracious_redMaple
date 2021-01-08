@@ -143,7 +143,7 @@ def transform_tree_r(command: Command):
         label_tmp = label_exit
 
         code_program.add_code_command("CODE_UNKNOWN")
-        code_program.add_arg_to_current_command(label_tmp)
+        code_program.add_arg_to_current_command(label_else)
         code_program.add_arg_to_current_command(-1)  # ?
         transform_tree_r(command.commands[0])
 
@@ -350,7 +350,7 @@ def transfer_tree_to_code(program: Command):
 
 data = """
 DECLARE
-    n,p(2:3)
+    n,p
 BEGIN
     READ n;
     REPEAT
@@ -367,133 +367,66 @@ BEGIN
 END
 """
 
+karol = """
+DECLARE
+	a, b, c, d, j, t
+BEGIN
+	a := 17822;
+	c := 55;
+	d := 2;
+	j := 1;
+
+	READ b;
+	b := b + d;
+	IF b > a THEN
+		t := b;
+		b := a;
+		a := t;
+	ELSE
+		IF b = a THEN
+			b := b - j;
+		ENDIF
+	ENDIF
+
+	FOR i FROM 1000 DOWNTO 1 DO
+		t := b / a;
+		c := c + t;
+		c := j * c;
+		b := d + b;
+		a := d + a;
+	ENDFOR
+	WRITE c;
+
+END
+"""
+
 if_test = """
-DECLARE 
-    x,y,p(8:12)
+DECLARE
+	a, b
 BEGIN
-    IF x = 5 THEN
-        x:= 2;
-    ENDIF
+    a:=5;
+    b:=16;
+	IF 9 != 8 THEN
+        a:=b;
+	ELSE
+        b:=a;
+	ENDIF
+	WRITE a;
+	WRITE b;
 END
 """
 
-stupid_test = """
-DECLARE 
-    x,y,w(1:3)
+for_test = """
+DECLARE
+	a
 BEGIN
-    w(2):=4;
-    w(3):=5;
-    y:=2;
-    x:=3;
-    w(x):=w(x) - w(y);
-    x:=w(x);
-    x:= x + 1;
-    WRITE w(x);
-END
-"""
-
-stupid_test_2 = """
-DECLARE 
-    x,y,w(10:30)
-BEGIN
-    w(15):= 12;
-    WRITE w(15);
-    READ w(15);
-    WRITE w(15);
-    x:=16;
-    READ w(x);
-    WRITE w(x);
-END
-"""
-
-for_test_1 = """
-DECLARE 
-    x, w(2:40)
-BEGIN
-    FOR i FROM w(i) TO 40 DO
-        FOR j FROM 10 TO 40 DO
-            WRITE w(j);
-        ENDFOR
-        WRITE w(i);
+    FOR i FROM 30 TO 40 DO
+        WRITE a;
     ENDFOR
-
-END
-"""
-while_test = """
-DECLARE 
-    x,y,w(10:30)
-BEGIN
-    WHILE x < 10 DO
-        WHILE y > 10 DO
-            y:= 10;
-        ENDWHILE
-        x:=2;
-    ENDWHILE
-END
-"""
-mul_test = """
-DECLARE 
-    x, w(0:13)
-BEGIN
-    w(0):=10;
-    w(4):=11;
-    x:=0;
-    y:=4;
-    x:=w(x)*w(y);
-    WRITE x;
 END
 """
 
-inc_test = """
-DECLARE 
-    x, w(0:13)
-BEGIN
-    x:=123;
-    x:=x-124;
-    WRITE x;
-END
-"""
-div_test = """
-DECLARE 
-    x
-BEGIN
-    y:= 14;
-    x:=y/4;
-    WRITE x;
-    x:=y/x;
-    WRITE x;
-    x:=y/14;
-    WRITE x;
-    x:=y/0;
-    WRITE x;
-    x:=y/15;
-    WRITE x;
-    x:=0/0;
-    WRITE x;
-END
-"""
-
-mod_test = """
-DECLARE 
-    x
-BEGIN
-    y:= 14;
-    x:=y%4;
-    WRITE x;
-    x:=y%x;
-    WRITE x;
-    x:=y%14;
-    WRITE x;
-    x:=y%0;
-    WRITE x;
-    x:=y%15;
-    WRITE x;
-    x:=0%0;
-    WRITE x;
-END
-"""
-
-result = parser.parse(div_test)
+result = parser.parse(if_test)
 # print(result)
 
 # symbol_table.show()

@@ -13,6 +13,16 @@ class assemblerGenerator:
     def __init__(self):
         self.asm_commands = []
 
+    def __str__(self):
+        table = ""
+        for command in self.asm_commands:
+            try:
+                table += command.type + " " + str(command.args) + "\n"
+            except AttributeError:  # for comments for debugging
+                table += command + "\n"
+
+        return table
+
     def add_asm_two_reg(self, ac_type, reg1, reg2):
         ac = assemblerCommand(ac_type, reg1, reg2)
         self.asm_commands.append(ac)
@@ -29,18 +39,42 @@ class assemblerGenerator:
         ac = assemblerCommand(ac_type, str(dest))
         self.asm_commands.append(ac)
 
+    def add_leap_of_faith_jump(self, ac_type, label_id):
+        ac = assemblerCommand(ac_type, "find:" + str(label_id))
+        self.asm_commands.append(ac)
+
+    def add_leap_of_faith_jump_reg(self, ac_type, reg1, label_id):
+        ac = assemblerCommand(ac_type, reg1, "find:" + str(label_id))
+        self.asm_commands.append(ac)
+
+    def add_leap_of_faith_label(self, label_id):
+        self.asm_commands.append("here:" + str(label_id))
+
     def add_comment(self, comment):
         self.asm_commands.append(comment)
 
-    def __str__(self):
-        table = ""
-        for command in self.asm_commands:
-            try:
-                table += command.type + " " + str(command.args) + "\n"
-            except AttributeError:  # for comments for debugging
-                table += command + "\n"
+    def leap_of_faith_fixer(self):
+        """Both this function's idea and this function's code is a big leap of faith"""
+        labels_addresses = {}
+        address = 1
+        i = 0
+        while i < len(self.asm_commands):
+            if not isinstance(self.asm_commands[i], assemblerCommand):
+                labels_addresses[self.asm_commands[i].split(":")[1]] = address
 
-        return table
+                i -= 1
+                self.asm_commands.pop(i + 1)
+            else:
+                address += 1
+            i += 1
+
+        for i, command in enumerate(self.asm_commands):
+            words = command.args.split(" ")
+            if len(words) >= 2 and "find:" in words[-2]:
+                words[-2] = str(labels_addresses[words[-2].split(":")[1]] - (i + 1))
+                self.asm_commands[i].args = " ".join(words)
+
+        print(labels_addresses)
 
 
 assembler_generator = assemblerGenerator()
@@ -125,9 +159,10 @@ def get_offset_from_array(array_id, parameter_id):
     else:
         pass  # TODO
 
+
 def copy_reg_value_to_reg(reg_to, reg_from):
     """THIS FUNCTION USES REGISTER a !!!"""
-    assembler_generator.add_asm_one_reg("RESET", "a") # offset = 0 is save place (I hope)
+    assembler_generator.add_asm_one_reg("RESET", "a")  # offset = 0 is save place (I hope)
     assembler_generator.add_asm_two_reg("STORE", reg_from, "a")
     assembler_generator.add_asm_two_reg("LOAD", reg_to, "a")
 
@@ -330,6 +365,38 @@ def translate_to_asm():
 
             assembler_generator.add_asm_one_reg("RESET", "a")
             assembler_generator.add_asm_two_reg("STORE", "d", "a")  # safely saved in 0-offset for copy to pick it up.
+
+        if code_command.type == "CODE_JEQ":
+            load_all_kinds_to_regs("b", "c", code_command.args[2:])
+            copy_reg_value_to_reg("d", "b")
+            # assembler_generator.add_comment("# EQ start her")
+
+            assembler_generator.add_asm_two_reg("SUB", "b", "c")
+            assembler_generator.add_asm_reg_jump("JZERO", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", 3)
+            assembler_generator.add_asm_two_reg("SUB", "c", "d")
+            assembler_generator.add_leap_of_faith_jump_reg("JZERO", "c", code_command.args[0])
+            # assembler_generator.add_comment("# EQ ends here")
+
+
+        if code_command.type == "CODE_JLEQ":
+            load_all_kinds_to_regs("a", "b", code_command.args[2:])
+
+            assembler_generator.add_asm_two_reg("SUB", "a", "b")
+            assembler_generator.add_leap_of_faith_jump_reg("JZERO", "a", code_command.args[0])
+
+        if code_command.type == "CODE_JBEQ":
+            load_all_kinds_to_regs("a", "b", code_command.args[2:])
+
+            assembler_generator.add_asm_two_reg("SUB", "b", "a")
+            assembler_generator.add_leap_of_faith_jump_reg("JZERO", "b", code_command.args[0])
+
+
+        if code_command.type == "CODE_LABEL":
+            assembler_generator.add_leap_of_faith_label(code_command.args[0])
+
+        if code_command.type == "CODE_JUMP":
+            assembler_generator.add_leap_of_faith_jump("JUMP", code_command.args[0])
 
         if code_command.type == "CODE_COPY":
             copy_arguments = code_command.args
@@ -547,23 +614,23 @@ def translate_to_asm():
 
         if code_command.type == "CODE_INC":
             # assembler_generator.add_comment("#BEGINIG")
-            load_all_kind_to_one_reg("a", code_command.args) # loading value to register
-            assembler_generator.add_asm_one_reg("INC", "a") # incrementing
+            load_all_kind_to_one_reg("a", code_command.args)  # loading value to register
+            assembler_generator.add_asm_one_reg("INC", "a")  # incrementing
 
             """ Assuming that only variables (not arrays) can be incremented. """
             offset = symbol_table.get_offset_by_index(code_command.args[0])
-            generate_const_in_reg("b", offset) # generating address in register
-            assembler_generator.add_asm_two_reg("STORE", "a", "b") # storing
+            generate_const_in_reg("b", offset)  # generating address in register
+            assembler_generator.add_asm_two_reg("STORE", "a", "b")  # storing
             # assembler_generator.add_comment("#ENDING")
 
         if code_command.type == "CODE_DEC":
-            load_all_kind_to_one_reg("a", code_command.args) # loading value to register
-            assembler_generator.add_asm_one_reg("DEC", "a") # incrementing
+            load_all_kind_to_one_reg("a", code_command.args)  # loading value to register
+            assembler_generator.add_asm_one_reg("DEC", "a")  # incrementing
 
             """ Assuming that only variables (not arrays) can be incremented. """
             offset = symbol_table.get_offset_by_index(code_command.args[0])
-            generate_const_in_reg("b", offset) # generating address in register
-            assembler_generator.add_asm_two_reg("STORE", "a", "b") # storing
+            generate_const_in_reg("b", offset)  # generating address in register
+            assembler_generator.add_asm_two_reg("STORE", "a", "b")  # storing
 
 
         # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
@@ -651,6 +718,7 @@ def translate_to_asm():
 symbol_table.show()
 save_all_consts_to_memory()
 translate_to_asm()
+assembler_generator.leap_of_faith_fixer()
 print(assembler_generator)
 
 with open('/home/gabriel/Desktop/first.txt', 'w') as f:
