@@ -19,7 +19,10 @@ def create_program(commands: Command):
 
 
 def set_variable(name):
-    symbol_table.add(name, "VARIABLE")
+    if symbol_table.get_symbol_by_name(name) is not None:
+        return
+    else:
+        symbol_table.add(name, "VARIABLE")
 
 
 def set_const(name):
@@ -66,6 +69,9 @@ def create_value_command(command_type, name):
 
 def create_iterator_command(command_type, name):
     index = symbol_table.get(name)
+
+    if index is not None and symbol_table.dict[index][1] == "VARIABLE":
+        return
 
     if index is not None and symbol_table.dict[index][1] != "ITERATOR":
         print(f"Iterator {name} was declared as VAR or ARR before.")
@@ -162,15 +168,17 @@ def p_command(p):
         p[0] = create_parent_command("COM_WHILE", p[2], p[4])
     elif p[1] == "REPEAT":
         p[0] = create_parent_command("COM_REPEAT", p[2], p[4])
-    elif p[1] == "FOR" and not p[5] == "DOWNTO":
+    elif p[1] == "FOR" and p[5] == "TO":
         set_variable(p[2])
+        set_variable(p[2] + "_fake_iter")
         p[0] = create_parent_command("COM_FOR", create_value_command("COM_PID", p[2]),
-                                     create_iterator_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6],
+                                     create_value_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6],
                                      p[8])  # TODO maybe fake iter name should be something like '9i'
     elif p[1] == "FOR" and p[5] == "DOWNTO":
         set_variable(p[2])
+        set_variable(p[2] + "_fake_iter")
         p[0] = create_parent_command("COM_FORDOWN", create_value_command("COM_PID", p[2]),
-                                     create_iterator_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6], p[8])
+                                     create_value_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6], p[8])
     elif p[1] == "READ":
         p[0] = create_parent_command("COM_READ", p[2])
     elif p[1] == "WRITE":

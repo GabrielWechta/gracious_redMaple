@@ -185,8 +185,8 @@ def load_all_kind_to_one_reg(register, *arguments):
     arguments = arguments[0]  # getting list from tuple
     if len(arguments) == 1:
         if symbol_table.get_type_by_index(arguments[0]) == "CONST" or symbol_table.get_type_by_index(
-                arguments[0]) == "VARIABLE":
-            load_var_from_id_to_reg(register, arguments[0])  # now in left_reg should be value of arguments[0]
+                arguments[0]) == "VARIABLE" or symbol_table.get_type_by_index(arguments[0]) == "ITERATOR":
+            load_var_from_id_to_reg(register, arguments[0])  # now in register should be value of arguments[0]
     if len(arguments) == 2:
         if symbol_table.get_type_by_index(arguments[0]) == "ARRAY":
             if symbol_table.get_type_by_index(arguments[1]) == "CONST":
@@ -454,6 +454,27 @@ def translate_to_asm():
                 assembler_generator.add_asm_two_reg("LOAD", "d", "d")
                 assembler_generator.add_asm_two_reg("STORE", "d", "c")
 
+        if code_command.type == "CODE_INC":
+            # assembler_generator.add_comment("#BEGINIG")
+            load_all_kind_to_one_reg("a", code_command.args) # loading value to register
+            assembler_generator.add_asm_one_reg("INC", "a") # incrementing
+
+            """ Assuming that only variables (not arrays) can be incremented. """
+            offset = symbol_table.get_offset_by_index(code_command.args[0])
+            generate_const_in_reg("b", offset) # generating address in register
+            assembler_generator.add_asm_two_reg("STORE", "a", "b") # storing
+            # assembler_generator.add_comment("#ENDING")
+
+        if code_command.type == "CODE_DEC":
+            load_all_kind_to_one_reg("a", code_command.args) # loading value to register
+            assembler_generator.add_asm_one_reg("DEC", "a") # incrementing
+
+            """ Assuming that only variables (not arrays) can be incremented. """
+            offset = symbol_table.get_offset_by_index(code_command.args[0])
+            generate_const_in_reg("b", offset) # generating address in register
+            assembler_generator.add_asm_two_reg("STORE", "a", "b") # storing
+
+
         # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
         elif code_command.type == "CODE_WRITE":
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
@@ -465,10 +486,15 @@ def translate_to_asm():
                 assembler_generator.add_asm_one_reg("PUT", reg)
 
             elif symbol_table.get_type_by_index(code_command.args[0]) == "CONST":
-                offset = code_command.args[0]
+                # offset = code_command.args[0]
 
+                # reg = "a"
+                # generate_const_in_reg(reg, offset)
+                # assembler_generator.add_asm_one_reg("PUT", reg)
+
+                """ FOR DEBUGGING !!!!"""
                 reg = "a"
-                generate_const_in_reg(reg, offset)
+                generate_const_in_reg(reg, symbol_table.dict[code_command.args[0]][2])
                 assembler_generator.add_asm_one_reg("PUT", reg)
 
             elif symbol_table.get_type_by_index(code_command.args[0]) == "ARRAY" and symbol_table.get_type_by_index(

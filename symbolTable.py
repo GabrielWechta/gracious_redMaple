@@ -23,6 +23,13 @@ class SymbolTable:
         else:
             return None
 
+    def get_symbol_by_name(self, name):
+        for key, value in self.dict.items():
+            if value[0] == name:
+                return value
+        else:
+            return None
+
     def get_offset_by_index(self, index):
         try:
             return self.dict[index][5]

@@ -230,7 +230,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_SUB")
         transform_tree_r(command.commands[1])
-        transform_tree_r(command.commands[1])
+        # transform_tree_r(command.commands[1]) # TODO is it necessary?
         transform_tree_r(command.commands[2])
 
         code_program.add_label(label_start)
@@ -410,9 +410,13 @@ for_test_1 = """
 DECLARE 
     x, w(2:40)
 BEGIN
-    FOR i FROM 10 TO 40 DO
+    FOR i FROM w(i) TO 40 DO
+        FOR j FROM 10 TO 40 DO
+            WRITE w(j);
+        ENDFOR
         WRITE w(i);
     ENDFOR
+
 END
 """
 while_test = """
@@ -440,8 +444,18 @@ BEGIN
 END
 """
 
+inc_test = """
+DECLARE 
+    x, w(0:13)
+BEGIN
+    x:=123;
+    x:=x-124;
+    WRITE x;
+END
+"""
 
-result = parser.parse(for_test_1)
+
+result = parser.parse(inc_test)
 # print(result)
 
 # symbol_table.show()
