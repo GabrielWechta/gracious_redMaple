@@ -72,6 +72,8 @@ class assemblerGenerator:
             words = command.args.split(" ")
             if len(words) >= 2 and "find:" in words[-2]:
                 words[-2] = str(labels_addresses[words[-2].split(":")[1]] - (i + 1))
+                # if int(words[-2]) < 0:
+                #     words[-2] = str(int(words[-2]) - 1)
                 self.asm_commands[i].args = " ".join(words)
 
         print(labels_addresses)
@@ -378,6 +380,40 @@ def translate_to_asm():
             assembler_generator.add_leap_of_faith_jump_reg("JZERO", "c", code_command.args[0])
             # assembler_generator.add_comment("# EQ ends here")
 
+        if code_command.type == "CODE_JNEQ":
+            load_all_kinds_to_regs("b", "c", code_command.args[2:])
+            copy_reg_value_to_reg("d", "b")
+            # assembler_generator.add_comment("# EQ start her")
+
+            assembler_generator.add_asm_two_reg("SUB", "b", "c")
+            assembler_generator.add_asm_reg_jump("JZERO", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", 3)
+            assembler_generator.add_asm_two_reg("SUB", "c", "d")
+            assembler_generator.add_asm_reg_jump("JZERO", "c", 2)
+            assembler_generator.add_leap_of_faith_jump("JUMP", code_command.args[0])
+            # assembler_generator.add_comment("# EQ ends here")
+
+        if code_command.type == "CODE_JLT":
+            load_all_kinds_to_regs("b", "c", code_command.args[2:])
+            copy_reg_value_to_reg("d", "b")
+
+            assembler_generator.add_asm_two_reg("SUB", "b", "c")
+            assembler_generator.add_asm_reg_jump("JZERO", "b", 2)
+            assembler_generator.add_asm_jump("JUMP", 4)
+            assembler_generator.add_asm_one_reg("INC", "d")
+            assembler_generator.add_asm_two_reg("SUB", "d", "c")
+            assembler_generator.add_leap_of_faith_jump_reg("JZERO", "d", code_command.args[0])
+
+        if code_command.type == "CODE_JGT":
+            load_all_kinds_to_regs("b", "c", code_command.args[2:])
+            copy_reg_value_to_reg("d", "c")
+
+            assembler_generator.add_asm_two_reg("SUB", "c", "b")
+            assembler_generator.add_asm_reg_jump("JZERO", "c", 2)
+            assembler_generator.add_asm_jump("JUMP", 4)
+            assembler_generator.add_asm_one_reg("INC", "d")
+            assembler_generator.add_asm_two_reg("SUB", "d", "b")
+            assembler_generator.add_leap_of_faith_jump_reg("JZERO", "d", code_command.args[0])
 
         if code_command.type == "CODE_JLEQ":
             load_all_kinds_to_regs("a", "b", code_command.args[2:])
@@ -385,12 +421,16 @@ def translate_to_asm():
             assembler_generator.add_asm_two_reg("SUB", "a", "b")
             assembler_generator.add_leap_of_faith_jump_reg("JZERO", "a", code_command.args[0])
 
-        if code_command.type == "CODE_JBEQ":
+        if code_command.type == "CODE_JGEQ":
             load_all_kinds_to_regs("a", "b", code_command.args[2:])
 
             assembler_generator.add_asm_two_reg("SUB", "b", "a")
             assembler_generator.add_leap_of_faith_jump_reg("JZERO", "b", code_command.args[0])
 
+        if code_command.type == "CODE_JZERO":
+            load_all_kind_to_one_reg("a", code_command.args[2:])
+
+            assembler_generator.add_leap_of_faith_jump_reg("JZERO", "a", code_command.args[0])
 
         if code_command.type == "CODE_LABEL":
             assembler_generator.add_leap_of_faith_label(code_command.args[0])
@@ -632,6 +672,14 @@ def translate_to_asm():
             generate_const_in_reg("b", offset)  # generating address in register
             assembler_generator.add_asm_two_reg("STORE", "a", "b")  # storing
 
+        if code_command.type == "CODE_ITER_SUB":
+            load_all_kinds_to_regs("e", "f", code_command.args)
+
+            assembler_generator.add_asm_two_reg("SUB", "e", "f")
+            offset = symbol_table.get_offset_by_index(code_command.args[0])
+            generate_const_in_reg("d", offset)
+            assembler_generator.add_asm_two_reg("STORE", "e", "d")
+
 
         # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
         elif code_command.type == "CODE_WRITE":
@@ -644,16 +692,16 @@ def translate_to_asm():
                 assembler_generator.add_asm_one_reg("PUT", reg)
 
             elif symbol_table.get_type_by_index(code_command.args[0]) == "CONST":
-                # offset = code_command.args[0]
+                offset = symbol_table.get_offset_by_index(code_command.args[0])
 
-                # reg = "a"
-                # generate_const_in_reg(reg, offset)
-                # assembler_generator.add_asm_one_reg("PUT", reg)
-
-                """ FOR DEBUGGING !!!!"""
                 reg = "a"
-                generate_const_in_reg(reg, symbol_table.dict[code_command.args[0]][2])
+                generate_const_in_reg(reg, offset)
                 assembler_generator.add_asm_one_reg("PUT", reg)
+
+                # """ FOR DEBUGGING !!!!"""
+                # reg = "a"
+                # generate_const_in_reg(reg, symbol_table.dict[code_command.args[0]][2])
+                # assembler_generator.add_asm_one_reg("PUT", reg)
 
             elif symbol_table.get_type_by_index(code_command.args[0]) == "ARRAY" and symbol_table.get_type_by_index(
                     code_command.args[1]) == "CONST":
@@ -679,13 +727,6 @@ def translate_to_asm():
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
                 index = code_command.args[0]
                 offset = symbol_table.get_offset_by_index(index)
-
-                reg = "a"
-                generate_const_in_reg(reg, offset)
-                assembler_generator.add_asm_one_reg("GET", reg)
-
-            elif symbol_table.get_type_by_index(code_command.args[0]) == "CONST":
-                offset = code_command.args[0]
 
                 reg = "a"
                 generate_const_in_reg(reg, offset)

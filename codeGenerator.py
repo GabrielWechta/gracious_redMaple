@@ -228,7 +228,7 @@ def transform_tree_r(command: Command):
         code_program.add_code_command("CODE_INC")
         transform_tree_r(command.commands[1])
 
-        code_program.add_code_command("CODE_SUB")
+        code_program.add_code_command("CODE_ITER_SUB")
         transform_tree_r(command.commands[1])
         # transform_tree_r(command.commands[1]) # TODO is it necessary?
         transform_tree_r(command.commands[2])
@@ -270,7 +270,7 @@ def transform_tree_r(command: Command):
         code_program.add_code_command("CODE_INC")
         transform_tree_r(command.commands[1])
 
-        code_program.add_code_command("CODE_SUB")
+        code_program.add_code_command("CODE_ITER_SUB")
         transform_tree_r(command.commands[1])
         transform_tree_r(command.commands[1])
         transform_tree_r(command.commands[3])
@@ -402,31 +402,80 @@ END
 
 if_test = """
 DECLARE
-	a, b
+	a, b, w(10:1000)
 BEGIN
-    a:=5;
-    b:=16;
-	IF 9 != 8 THEN
-        a:=b;
+    
+    w(20):=1;
+    w(32):=12;
+	IF w(32) > w(20) THEN
+	    IF w(32) > 12 THEN
+	        WRITE 11;
+	    ELSE   
+	        WRITE 9;
+	    ENDIF
 	ELSE
-        b:=a;
+    	WRITE 10;
 	ENDIF
-	WRITE a;
-	WRITE b;
 END
 """
 
 for_test = """
 DECLARE
-	a
+	a, w(0:10)
 BEGIN
-    FOR i FROM 30 TO 40 DO
-        WRITE a;
+    FOR i FROM 0 TO 3 DO
+        w(i) := i;
+    ENDFOR
+    
+    FOR j FROM 0 TO 4 DO
+        WRITE w(j);
     ENDFOR
 END
 """
 
-result = parser.parse(if_test)
+while_test = """
+DECLARE
+	a
+BEGIN
+    a:=1;
+    REPEAT
+        a:= a + 1;
+        WRITE a;
+    UNTIL a > 30;
+END
+"""
+
+mr_gebala_test = """
+[ Rozkład liczby na czynniki pierwsze ]
+DECLARE
+    n, m, reszta, potega, dzielnik
+BEGIN
+    READ n;
+    dzielnik := 2;
+    m := dzielnik * dzielnik;
+    WHILE n >= m DO
+        potega := 0;
+        reszta := n % dzielnik;
+        WHILE reszta = 0 DO
+            n := n / dzielnik;
+            potega := potega + 1;
+            reszta := n % dzielnik;
+        ENDWHILE
+        IF potega > 0 THEN [ czy znaleziono dzielnik ]
+            WRITE dzielnik;
+            WRITE potega;
+        ELSE
+            dzielnik := dzielnik + 1;
+            m := dzielnik * dzielnik;
+        ENDIF
+    ENDWHILE
+    IF n != 1 THEN [ ostatni dzielnik ]
+        WRITE n;
+        WRITE 1;
+    ENDIF
+END
+"""
+result = parser.parse(mr_gebala_test)
 # print(result)
 
 # symbol_table.show()
