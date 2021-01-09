@@ -1,3 +1,5 @@
+import sys
+
 import ply.yacc as yacc
 from symbolTable import SymbolTable
 
@@ -16,6 +18,13 @@ def create_program(commands: Command):
     program.commands.append(commands)
 
     return program
+
+def set_variable_in_declaration(name):
+    if symbol_table.get_symbol_by_name(name) is not None:
+        print(f"Double {name} variable declaration", file=sys.stderr)
+        raise Exception
+    else:
+        symbol_table.add(name, "VARIABLE")
 
 
 def set_variable(name):
@@ -122,11 +131,13 @@ def p_declarations(p):
                     | PIDENTIFIER LPAREN NUM COLON NUM RPAREN"""
 
     if len(p) == 4:
-        set_variable(p[3])
+        # TODO check if ok
+        set_variable_in_declaration(p[3])
     elif len(p) == 9:
         set_array(p[3], p[5], p[7])
     elif len(p) == 2:
-        set_variable(p[1])
+        # TODO check if ok
+        set_variable_in_declaration(p[1])
     elif len(p) == 7:
         set_array(p[1], p[3], p[5])
 
@@ -136,7 +147,7 @@ def p_commands(p):
                 | commands command """
     #  | commands """
 
-    # TODO possible bug maybe his way?
+    # TODO possible bug, maybe his way?
     if len(p) == 3:
         p[0] = add_command(p[1], p[2])
     elif len(p) == 1:
@@ -250,13 +261,20 @@ def p_identifier_pidentifier(p):
         p[0] = create_value_command("COM_PID", p[1])
     elif len(p) == 5:
         set_variable(p[3]) # TODO
+        # TODO check if ok
+        if symbol_table.get_symbol_by_name(p[1])[1] != "ARRAY":
+            print(f"{p[1]} is not array.", file=sys.stderr)
+            raise Exception
         p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
                                      create_value_command("COM_PID", p[3]))
 
 
 def p_identifier_num(p):
     """identifier   : PIDENTIFIER LPAREN NUM RPAREN"""
-
+    # TODO check if ok
+    if symbol_table.get_symbol_by_name(p[1])[1] != "ARRAY":
+        print(f"{p[1]} is not array.", file=sys.stderr)
+        raise Exception
     if symbol_table.get(str(p[3])) is None:
         set_const(str(p[3]))
     p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),

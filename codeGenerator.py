@@ -347,135 +347,55 @@ def transfer_tree_to_code(program: Command):
     transform_tree_r(program)
     return code_program
 
-
-data = """
+error = """
+[ Błąd w linii 6: niewłaściwe użycie zmiennej a ]
 DECLARE
-    n,p
+  a, b(1:20)
 BEGIN
-    READ n;
-    REPEAT
-        [wdwdds ]
-        p:=n/2;
-        p:=2*p;
-        IF n>=p THEN 
-            WRITE 1;
-        ELSE 
-            WRITE 0;
-        ENDIF
-        n:=n/2;
-    UNTIL n=0;
+  a := 1;
+  a:= b(a);
 END
 """
 
-karol = """
+ok = """
 DECLARE
-	a, b, c, d, j, t
+	fact, n 
 BEGIN
-	a := 17822;
-	c := 55;
-	d := 2;
-	j := 1;
-
-	READ b;
-	b := b + d;
-	IF b > a THEN
-		t := b;
-		b := a;
-		a := t;
-	ELSE
-		IF b = a THEN
-			b := b - j;
-		ENDIF
-	ENDIF
-
-	FOR i FROM 1000 DOWNTO 1 DO
-		t := b / a;
-		c := c + t;
-		c := j * c;
-		b := d + b;
-		a := d + a;
-	ENDFOR
-	WRITE c;
-
-END
-"""
-
-if_test = """
-DECLARE
-	a, b, w(10:1000)
-BEGIN
+	READ n;
+	fact := 1;
+	FOR k FROM 1 TO n DO
+		fact := fact * k;
+	ENDFOR    
     
-    w(20):=1;
-    w(32):=12;
-	IF w(32) > w(20) THEN
-	    IF w(32) > 12 THEN
-	        WRITE 11;
-	    ELSE   
-	        WRITE 9;
-	    ENDIF
-	ELSE
-    	WRITE 10;
-	ENDIF
+	WRITE fact;
+
+	[ Liczy n! ]
 END
 """
 
-for_test = """
+my = """
 DECLARE
-	a, w(0:10)
+	fact, r, n, k 
 BEGIN
-    FOR i FROM 0 TO 3 DO
-        w(i) := i;
-    ENDFOR
-    
-    FOR j FROM 0 TO 4 DO
-        WRITE w(j);
-    ENDFOR
-END
-"""
-
-while_test = """
-DECLARE
-	a
-BEGIN
-    a:=1;
+	READ n;
+	fact := 1;
+    k := 1;
     REPEAT
-        a:= a + 1;
-        WRITE a;
-    UNTIL a > 30;
-END
-"""
-
-mr_gebala_test = """
-[ Rozkład liczby na czynniki pierwsze ]
-DECLARE
-    n, m, reszta, potega, dzielnik
-BEGIN
-    READ n;
-    dzielnik := 2;
-    m := dzielnik * dzielnik;
-    WHILE n >= m DO
-        potega := 0;
-        reszta := n % dzielnik;
-        WHILE reszta = 0 DO
-            n := n / dzielnik;
-            potega := potega + 1;
-            reszta := n % dzielnik;
-        ENDWHILE
-        IF potega > 0 THEN [ czy znaleziono dzielnik ]
-            WRITE dzielnik;
-            WRITE potega;
+        r := k % 2;  
+        IF r != 0 THEN
+		    fact := fact * k;
         ELSE
-            dzielnik := dzielnik + 1;
-            m := dzielnik * dzielnik;
+            fact := k * fact;
         ENDIF
-    ENDWHILE
-    IF n != 1 THEN [ ostatni dzielnik ]
-        WRITE n;
-        WRITE 1;
-    ENDIF
+        k := k + 1;
+	UNTIL k > n;    
+    
+	WRITE fact;
+
+	[ Liczy n! ]
 END
 """
-result = parser.parse(mr_gebala_test)
+result = parser.parse(ok)
 # print(result)
 
 # symbol_table.show()
