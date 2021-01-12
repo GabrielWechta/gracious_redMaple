@@ -140,16 +140,15 @@ def load_var_from_offset_to_reg(register, offset):
     generate_const_in_reg(register, offset)
     assembler_generator.add_asm_two_reg("LOAD", register, register)
 
-
 def load_var_from_array_with_variable_to_reg(register, array_id, variable_id):
-    """registers c and d are used here!!!"""
+    """registers e and f are used here!!!"""
     array = symbol_table.dict[array_id]
 
     load_var_from_id_to_reg(register, variable_id)
-    generate_const_in_reg("c", array[3])
-    generate_const_in_reg("d", array[5])
-    assembler_generator.add_asm_two_reg("SUB", register, "c")
-    assembler_generator.add_asm_two_reg("ADD", register, "d")
+    generate_const_in_reg("e", array[3])
+    generate_const_in_reg("f", array[5])
+    assembler_generator.add_asm_two_reg("SUB", register, "e")
+    assembler_generator.add_asm_two_reg("ADD", register, "f")
     assembler_generator.add_asm_two_reg("LOAD", register, register)  # now in register should be wanted array field
 
 
@@ -158,8 +157,7 @@ def get_offset_from_array(array_id, parameter_id):
     parameter = symbol_table.dict[parameter_id]
     if parameter[2] is not None:
         return array[5] + (parameter[2] - array[3])  # returns relative memory position from array
-    else:
-        pass  # TODO
+
 
 
 def copy_reg_value_to_reg(reg_to, reg_from):
@@ -202,10 +200,12 @@ def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
             if symbol_table.get_type_by_index(arguments[2]) == "CONST":
                 offset = get_offset_from_array(arguments[1], arguments[2])
                 load_var_from_offset_to_reg(right_reg, offset)
+                return # it must be here cause otherwise this case falls inside another big if
 
             if symbol_table.get_type_by_index(arguments[2]) == "VARIABLE":
                 symbol_table.raise_if_not_initialized_by_index(arguments[2])
                 load_var_from_array_with_variable_to_reg(right_reg, arguments[1], arguments[2])
+                return # it must be here cause otherwise this case falls inside another big if
 
         if symbol_table.get_type_by_index(arguments[2]) == "CONST" or symbol_table.get_type_by_index(
                 arguments[2]) == "VARIABLE":
@@ -722,10 +722,10 @@ def translate_to_asm():
             generate_const_in_reg("d", offset)
             assembler_generator.add_asm_two_reg("STORE", "e", "d")
 
+            """To forget iterator after loop"""
         if (code_command.type == "CODE_INC" or code_command.type == "CODE_DEC") and next_command.type == "CODE_DEC":
             symbol_table.uninitialize_by_index(code_command.args[0])
             symbol_table.uninitialize_by_index(next_command.args[0])
-
 
         # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
         elif code_command.type == "CODE_WRITE":

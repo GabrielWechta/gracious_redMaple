@@ -1,3 +1,5 @@
+import sys
+
 from parser import Command, parser, symbol_table
 
 
@@ -217,6 +219,10 @@ def transform_tree_r(command: Command):
         label_exit = code_program.label
         code_program.label += 1
 
+        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[3].index:
+            print("Incorrect FOR loop.", file=sys.stderr)
+            raise Exception
+
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
         transform_tree_r(command.commands[2])
@@ -258,6 +264,10 @@ def transform_tree_r(command: Command):
         code_program.label += 1
         label_exit = code_program.label
         code_program.label += 1
+
+        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[3].index:
+            print("Incorrect FOR loop.", file=sys.stderr)
+            raise Exception
 
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
@@ -347,77 +357,37 @@ def transfer_tree_to_code(program: Command):
     transform_tree_r(program)
     return code_program
 
-error = """
-DECLARE
-  a, b, p(0:4)
-BEGIN
-    FOR i FROM 1 TO 10 DO
-        WRITE i;
-    ENDFOR
+def catch_errors(code):
+    check = False
+    iterator_index = -1
+    label_count = 0
+    for code_command, next_command, last_command in zip(code.code_commands, code.code_commands[1:], code.code_commands[2:]):
 
-    WRITE i;
-END
+        if code_command.type == "CODE_COPY" and next_command.type == "CODE_COPY" and last_command.type == "CODE_INC":
+            iterator_index = code_command.args[0]
+            check = True
+            continue
+
+        if check == True and label_count == 1 and last_command.type == "CODE_LABEL":
+            label_count = 0
+            check = False
+
+        if check == True and last_command.type == "CODE_LABEL":
+            label_count += 1
+
+        if code_command.type == "CODE_COPY" and check == True and code_command.args[0] == iterator_index:
+            print("Iterator modification inside loop", file=sys.stderr)
+            raise Exception
+easy = """
 """
-
-ok = """
-DECLARE
-	fact, n 
-BEGIN
-	READ n;
-	fact := 1;
-	FOR k FROM n DOWNTO 1 DO
-		fact := fact * k;
-	ENDFOR    
-	WRITE fact;
-
-	[ Liczy n! ]
-END
-"""
-
-my = """
-DECLARE
-	a, b, i, j, acc, accb
-BEGIN
-	READ a;
-	READ b;
-	j := 512;
- 	i := 1;
-	acc := 0;
-	accb := 0;
-
-	WRITE j;
-	
-	acc := a;  [ acc = a ]
-	accb := b; [ accb = b ]
-	
-	WHILE i <= 1000 DO 			[ if i % 2 == 0 then acc += i/2 ]
-		j := i % 2;
-		IF 1 != j THEN
-			j := i / 2;
-			acc := acc + j;
-		ENDIF
-		j := 0;
-		WHILE 10 > j DO
-			accb := 2 + accb;
-			accb := accb - 1;
-			j := j + 1;
-		ENDWHILE				[ accb += 10 ]
-		i := i + 1;
-	ENDWHILE					[ acc += 125250; accb := 10000 ]
-
-	WRITE a;
-	WRITE b;
-	WRITE acc;  [ acc = a + 125250 ]
-	WRITE accb; [ accb = b + 10000 ]
-END
-"""
-result = parser.parse(error)
+result = parser.parse(easy)
 # print(result)
 
 # symbol_table.show()
 
 intermediate = transfer_tree_to_code(result)
 intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
+catch_errors(intermediate)
 print(intermediate)
 
 
