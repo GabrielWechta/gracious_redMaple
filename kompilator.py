@@ -1,3 +1,5 @@
+import sys
+
 from codeGenerator import symbol_table, intermediate
 
 
@@ -814,7 +816,12 @@ translate_to_asm()
 assembler_generator.leap_of_faith_fixer()
 symbol_table.show()
 
+file = open(sys.argv[2], 'w')
+file.write(str(assembler_generator))
+
 print(assembler_generator)
+
+
 
 with open('/home/gabriel/Desktop/first.txt', 'w') as f:
     print(assembler_generator, file=f)

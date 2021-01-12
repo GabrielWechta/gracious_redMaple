@@ -379,16 +379,19 @@ def catch_errors(code):
         if code_command.type == "CODE_COPY" and check == True and code_command.args[0] == iterator_index:
             print("Iterator modification inside loop", file=sys.stderr)
             raise Exception
-easy = """
-"""
-result = parser.parse(easy)
-# print(result)
 
-# symbol_table.show()
+""" Parsing and intermediate code generating. """
+
+file = open(sys.argv[1], 'r')
+easy = file.read()
+print(easy)
+
+result = parser.parse(easy)
 
 intermediate = transfer_tree_to_code(result)
 intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
 catch_errors(intermediate)
+
 print(intermediate)
 
 

@@ -1,0 +1,14 @@
+RESET a 
+INC a 
+SHL a 
+SHL a 
+INC a 
+SHL a 
+RESET b 
+INC b 
+SHL b 
+INC b 
+SHL b 
+SHL b 
+INC b 
+STORE a b 
