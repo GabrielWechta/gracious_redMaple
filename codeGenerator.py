@@ -272,7 +272,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_ITER_SUB")
         transform_tree_r(command.commands[1])
-        transform_tree_r(command.commands[1])
+        # transform_tree_r(command.commands[1])
         transform_tree_r(command.commands[3])
 
         code_program.add_label(label_start)
@@ -348,12 +348,14 @@ def transfer_tree_to_code(program: Command):
     return code_program
 
 error = """
-[ Błąd w linii 6: niewłaściwe użycie zmiennej a ]
 DECLARE
-  a, b(1:20)
+  a, b, p(0:4)
 BEGIN
-  a := 1;
-  a:= b(a);
+    FOR i FROM 1 TO 10 DO
+        WRITE i;
+    ENDFOR
+
+    WRITE i;
 END
 """
 
@@ -363,10 +365,9 @@ DECLARE
 BEGIN
 	READ n;
 	fact := 1;
-	FOR k FROM 1 TO n DO
+	FOR k FROM n DOWNTO 1 DO
 		fact := fact * k;
 	ENDFOR    
-    
 	WRITE fact;
 
 	[ Liczy n! ]
@@ -375,27 +376,42 @@ END
 
 my = """
 DECLARE
-	fact, r, n, k 
+	a, b, i, j, acc, accb
 BEGIN
-	READ n;
-	fact := 1;
-    k := 1;
-    REPEAT
-        r := k % 2;  
-        IF r != 0 THEN
-		    fact := fact * k;
-        ELSE
-            fact := k * fact;
-        ENDIF
-        k := k + 1;
-	UNTIL k > n;    
-    
-	WRITE fact;
+	READ a;
+	READ b;
+	j := 512;
+ 	i := 1;
+	acc := 0;
+	accb := 0;
 
-	[ Liczy n! ]
+	WRITE j;
+	
+	acc := a;  [ acc = a ]
+	accb := b; [ accb = b ]
+	
+	WHILE i <= 1000 DO 			[ if i % 2 == 0 then acc += i/2 ]
+		j := i % 2;
+		IF 1 != j THEN
+			j := i / 2;
+			acc := acc + j;
+		ENDIF
+		j := 0;
+		WHILE 10 > j DO
+			accb := 2 + accb;
+			accb := accb - 1;
+			j := j + 1;
+		ENDWHILE				[ accb += 10 ]
+		i := i + 1;
+	ENDWHILE					[ acc += 125250; accb := 10000 ]
+
+	WRITE a;
+	WRITE b;
+	WRITE acc;  [ acc = a + 125250 ]
+	WRITE accb; [ accb = b + 10000 ]
 END
 """
-result = parser.parse(ok)
+result = parser.parse(error)
 # print(result)
 
 # symbol_table.show()

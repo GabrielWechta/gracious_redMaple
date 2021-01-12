@@ -35,7 +35,7 @@ def set_variable(name):
 
 
 def set_const(name):
-    symbol_table.add(name, "CONST", int(name))
+    symbol_table.add(name, "CONST", int(name), None, None, True)
 
 
 def set_array(name, begin, end):
