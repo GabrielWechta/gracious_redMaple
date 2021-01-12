@@ -358,6 +358,7 @@ def transfer_tree_to_code(program: Command):
     return code_program
 
 def catch_errors(code):
+    """ For now this function only catches changing iterator inside both FOR loops. """
     check = False
     iterator_index = -1
     label_count = 0

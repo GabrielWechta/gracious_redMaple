@@ -108,7 +108,6 @@ from lex import tokens
 precedence = (
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
-    # TODO maybe if then else??
 )
 
 start = 'program'
@@ -131,12 +130,10 @@ def p_declarations(p):
                     | PIDENTIFIER LPAREN NUM COLON NUM RPAREN"""
 
     if len(p) == 4:
-        # TODO check if ok
         set_variable_in_declaration(p[3])
     elif len(p) == 9:
         set_array(p[3], p[5], p[7])
     elif len(p) == 2:
-        # TODO check if ok
         set_variable_in_declaration(p[1])
     elif len(p) == 7:
         set_array(p[1], p[3], p[5])
@@ -289,36 +286,4 @@ def p_error(t):
 
 
 parser = yacc.yacc()
-data = """
-DECLARE
-    n,p(2:3)
-BEGIN
-    READ n;
-    REPEAT
-        [wdwdds ]
-        p:=n/2;
-        p:=2*p;
-        IF n>=p THEN 
-            WRITE 1;
-        ELSE 
-            WRITE 0;
-        ENDIF
-        n:=n/2;
-    UNTIL n=0;
-END
-"""
 
-testing_data = """
-DECLARE 
-    x, y, z, w(9:11)
-BEGIN
-    x:=2;
-    y:=3;
-    IF x<y THEN
-        z:=x-y;
-    ELSE
-        z:=y-x;
-    ENDIF
-
-END
-"""
