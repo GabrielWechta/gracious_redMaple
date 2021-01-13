@@ -19,6 +19,7 @@ def create_program(commands: Command):
 
     return program
 
+
 def set_variable_in_declaration(name):
     if symbol_table.get_symbol_by_name(name) is not None:
         print(f"Double {name} variable declaration", file=sys.stderr)
@@ -35,7 +36,7 @@ def set_variable(name):
 
 
 def set_const(name):
-    symbol_table.add(name, "CONST", int(name))
+    symbol_table.add(name, "CONST", int(name), None, None, True)
 
 
 def set_array(name, begin, end):
@@ -62,7 +63,7 @@ def create_parent_command(command_type, *children):
 
 
 def create_value_command(command_type, name):
-    if type(name) == int:  # TODO for const. Const's name is well... she. Is it good?
+    if type(name) == int:
         name = str(name)
 
     index = symbol_table.get(name)
@@ -108,7 +109,6 @@ from lex import tokens
 precedence = (
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
-    # TODO maybe if then else??
 )
 
 start = 'program'
@@ -131,13 +131,13 @@ def p_declarations(p):
                     | PIDENTIFIER LPAREN NUM COLON NUM RPAREN"""
 
     if len(p) == 4:
-        # TODO check if ok
         set_variable_in_declaration(p[3])
+        symbol_table.add_to_declaration_sack(p[3])
     elif len(p) == 9:
         set_array(p[3], p[5], p[7])
     elif len(p) == 2:
-        # TODO check if ok
         set_variable_in_declaration(p[1])
+        symbol_table.add_to_declaration_sack(p[1])
     elif len(p) == 7:
         set_array(p[1], p[3], p[5])
 
@@ -145,17 +145,11 @@ def p_declarations(p):
 def p_commands(p):
     """commands :
                 | commands command """
-    #  | commands """
 
-    # TODO possible bug, maybe his way?
     if len(p) == 3:
         p[0] = add_command(p[1], p[2])
     elif len(p) == 1:
         p[0] = create_empty_command("COM_COMMANDS")
-        # print(p[0], p[1])
-        # command = p[1]
-        # p[0].commands.append(Command("COM_COMMANDS"))  # ?
-        # p[0] = add_command(p[1], Command("COM_COMMANDS"))
 
 
 def p_command(p):
@@ -181,15 +175,18 @@ def p_command(p):
         p[0] = create_parent_command("COM_REPEAT", p[2], p[4])
     elif p[1] == "FOR" and p[5] == "TO":
         set_variable(p[2])
-        set_variable(p[2] + "_fake_iter")
+        set_variable(p[2] + "_FAKE_iter")
+        symbol_table.add_to_declaration_sack(p[2])
         p[0] = create_parent_command("COM_FOR", create_value_command("COM_PID", p[2]),
-                                     create_value_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6],
-                                     p[8])  # TODO maybe fake iter name should be something like '9i'
+                                     create_value_command("COM_PID", p[2] + "_FAKE_iter"), p[4], p[6],
+                                     p[8])
+
     elif p[1] == "FOR" and p[5] == "DOWNTO":
         set_variable(p[2])
-        set_variable(p[2] + "_fake_iter")
+        set_variable(p[2] + "_FAKE_iter")
+        symbol_table.add_to_declaration_sack(p[2])
         p[0] = create_parent_command("COM_FORDOWN", create_value_command("COM_PID", p[2]),
-                                     create_value_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6], p[8])
+                                     create_value_command("COM_PID", p[2] + "_FAKE_iter"), p[4], p[6], p[8])
     elif p[1] == "READ":
         p[0] = create_parent_command("COM_READ", p[2])
     elif p[1] == "WRITE":
@@ -257,11 +254,10 @@ def p_identifier_pidentifier(p):
                     | PIDENTIFIER LPAREN PIDENTIFIER RPAREN"""
 
     if len(p) == 2:
-        set_variable(p[1]) # TODO
+        set_variable(p[1])
         p[0] = create_value_command("COM_PID", p[1])
     elif len(p) == 5:
-        set_variable(p[3]) # TODO
-        # TODO check if ok
+        set_variable(p[3])
         if symbol_table.get_symbol_by_name(p[1])[1] != "ARRAY":
             print(f"{p[1]} is not array.", file=sys.stderr)
             raise Exception
@@ -271,7 +267,6 @@ def p_identifier_pidentifier(p):
 
 def p_identifier_num(p):
     """identifier   : PIDENTIFIER LPAREN NUM RPAREN"""
-    # TODO check if ok
     if symbol_table.get_symbol_by_name(p[1])[1] != "ARRAY":
         print(f"{p[1]} is not array.", file=sys.stderr)
         raise Exception
@@ -289,36 +284,3 @@ def p_error(t):
 
 
 parser = yacc.yacc()
-data = """
-DECLARE
-    n,p(2:3)
-BEGIN
-    READ n;
-    REPEAT
-        [wdwdds ]
-        p:=n/2;
-        p:=2*p;
-        IF n>=p THEN 
-            WRITE 1;
-        ELSE 
-            WRITE 0;
-        ENDIF
-        n:=n/2;
-    UNTIL n=0;
-END
-"""
-
-testing_data = """
-DECLARE 
-    x, y, z, w(9:11)
-BEGIN
-    x:=2;
-    y:=3;
-    IF x<y THEN
-        z:=x-y;
-    ELSE
-        z:=y-x;
-    ENDIF
-
-END
-"""

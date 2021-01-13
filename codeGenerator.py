@@ -1,3 +1,5 @@
+import sys
+
 from parser import Command, parser, symbol_table
 
 
@@ -217,6 +219,10 @@ def transform_tree_r(command: Command):
         label_exit = code_program.label
         code_program.label += 1
 
+        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[3].index:
+            print("Incorrect FOR loop.", file=sys.stderr)
+            raise Exception
+
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
         transform_tree_r(command.commands[2])
@@ -230,7 +236,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_ITER_SUB")
         transform_tree_r(command.commands[1])
-        # transform_tree_r(command.commands[1]) # TODO is it necessary?
+        # transform_tree_r(command.commands[1]) # is it necessary?
         transform_tree_r(command.commands[2])
 
         code_program.add_label(label_start)
@@ -259,6 +265,10 @@ def transform_tree_r(command: Command):
         label_exit = code_program.label
         code_program.label += 1
 
+        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[3].index:
+            print("Incorrect FOR loop.", file=sys.stderr)
+            raise Exception
+
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
         transform_tree_r(command.commands[2])
@@ -272,7 +282,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_ITER_SUB")
         transform_tree_r(command.commands[1])
-        transform_tree_r(command.commands[1])
+        # transform_tree_r(command.commands[1])
         transform_tree_r(command.commands[3])
 
         code_program.add_label(label_start)
@@ -347,61 +357,76 @@ def transfer_tree_to_code(program: Command):
     transform_tree_r(program)
     return code_program
 
-error = """
-[ Błąd w linii 6: niewłaściwe użycie zmiennej a ]
+def catch_errors(code):
+    """ For now this function only catches changing iterator inside both FOR loops. """
+    check = False
+    iterator_index = -1
+    label_count = 0
+    for code_command, next_command, last_command in zip(code.code_commands, code.code_commands[1:], code.code_commands[2:]):
+
+        if code_command.type == "CODE_COPY" and next_command.type == "CODE_COPY" and last_command.type == "CODE_INC":
+            iterator_index = code_command.args[0]
+            check = True
+            continue
+
+        if check == True and label_count == 1 and last_command.type == "CODE_LABEL":
+            label_count = 0
+            check = False
+
+        if check == True and last_command.type == "CODE_LABEL":
+            label_count += 1
+
+        if code_command.type == "CODE_COPY" and check == True and code_command.args[0] == iterator_index:
+            print("Iterator modification inside loop", file=sys.stderr)
+            raise Exception
+
+""" Parsing and intermediate code generating. """
+
+# file = open(sys.argv[1], 'r')
+# easy = file.read()
+easy = """
 DECLARE
-  a, b(1:20)
+	n, _r, r_, j, k, d, c, ta(0:24), tb(100:124), tc(999900:999924)
 BEGIN
-  a := 1;
-  a:= b(a);
+	n := 25 - 1;
+	c := n * 5; [ c = 120 ]
+	c := 5 + c; [ c = 125 ]
+	c := c - 1; [ c = 124 ]
+	n := 25 - 1;        [       n = 24     ]
+    _r := n + 999876;   [      _r = 999900 ]
+    r_ := _r + n;       [      r_ = 999924 ]
+	tc(_r) := n;        [  tc(_r) = 24     ]
+	tc(r_) := n - n;    [  tc(r_) = 0   ] 
+
+    FOR i FROM tc(_r) DOWNTO tc(r_) DO  [ i from 24 to 0 ]
+		ta(i) := i;
+            j := c - i;                 [ j from 100 to 124 <- j := 124 - i ]
+		tb(j) := c - j;                 [ c - j = c - (c - i) = i ]
+	ENDFOR
+	[ ta = (0,1,2,...,23,24) ]
+	[ tb = (24,23,...,2,1,0) ] 
+	
+	d := 999800;
+	FOR i FROM tc(r_) TO tc(_r) DO  [ i from      0 to     24 ]
+        j := 100 + i;               [ j from    100 to    124 <- j :=    100 + i ]
+        k := d + j;                 [ k from 999900 to 999924 <- k := 999800 + j ] 
+		tc(k) := ta(i) * tb(j);
+	ENDFOR
+	[ tc = (0,23,44,...,143,144,143,...,44,23,0) ]
+
+	FOR i FROM _r TO r_ DO
+		WRITE tc(i);
+	ENDFOR
+
 END
 """
-
-ok = """
-DECLARE
-	fact, n 
-BEGIN
-	READ n;
-	fact := 1;
-	FOR k FROM 1 TO n DO
-		fact := fact * k;
-	ENDFOR    
-    
-	WRITE fact;
-
-	[ Liczy n! ]
-END
-"""
-
-my = """
-DECLARE
-	fact, r, n, k 
-BEGIN
-	READ n;
-	fact := 1;
-    k := 1;
-    REPEAT
-        r := k % 2;  
-        IF r != 0 THEN
-		    fact := fact * k;
-        ELSE
-            fact := k * fact;
-        ENDIF
-        k := k + 1;
-	UNTIL k > n;    
-    
-	WRITE fact;
-
-	[ Liczy n! ]
-END
-"""
-result = parser.parse(ok)
-# print(result)
-
-# symbol_table.show()
+# print(easy)
+result = parser.parse(easy)
 
 intermediate = transfer_tree_to_code(result)
 intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
-print(intermediate)
+catch_errors(intermediate)
+
+# print(intermediate)
 
 

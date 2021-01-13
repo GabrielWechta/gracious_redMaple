@@ -1,3 +1,5 @@
+import sys
+
 from codeGenerator import symbol_table, intermediate
 
 
@@ -76,7 +78,7 @@ class assemblerGenerator:
                 #     words[-2] = str(int(words[-2]) - 1)
                 self.asm_commands[i].args = " ".join(words)
 
-        print(labels_addresses)
+        # print(labels_addresses)
 
 
 assembler_generator = assemblerGenerator()
@@ -140,16 +142,15 @@ def load_var_from_offset_to_reg(register, offset):
     generate_const_in_reg(register, offset)
     assembler_generator.add_asm_two_reg("LOAD", register, register)
 
-
 def load_var_from_array_with_variable_to_reg(register, array_id, variable_id):
-    """registers c and d are used here!!!"""
+    """registers d and f are used here!!!"""
     array = symbol_table.dict[array_id]
 
     load_var_from_id_to_reg(register, variable_id)
     generate_const_in_reg("c", array[3])
-    generate_const_in_reg("d", array[5])
+    generate_const_in_reg("f", array[5])
     assembler_generator.add_asm_two_reg("SUB", register, "c")
-    assembler_generator.add_asm_two_reg("ADD", register, "d")
+    assembler_generator.add_asm_two_reg("ADD", register, "f")
     assembler_generator.add_asm_two_reg("LOAD", register, register)  # now in register should be wanted array field
 
 
@@ -158,8 +159,7 @@ def get_offset_from_array(array_id, parameter_id):
     parameter = symbol_table.dict[parameter_id]
     if parameter[2] is not None:
         return array[5] + (parameter[2] - array[3])  # returns relative memory position from array
-    else:
-        pass  # TODO
+
 
 
 def copy_reg_value_to_reg(reg_to, reg_from):
@@ -175,15 +175,18 @@ def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
     if len(arguments) == 2:
         if symbol_table.get_type_by_index(arguments[0]) == "CONST" or symbol_table.get_type_by_index(
                 arguments[0]) == "VARIABLE":
+            symbol_table.raise_if_not_initialized_by_index(arguments[0])
             load_var_from_id_to_reg(left_reg, arguments[0])  # now in left_reg should be value of arguments[0]
 
         if symbol_table.get_type_by_index(arguments[1]) == "CONST" or symbol_table.get_type_by_index(
                 arguments[1]) == "VARIABLE":
+            symbol_table.raise_if_not_initialized_by_index(arguments[1])
             load_var_from_id_to_reg(right_reg, arguments[1])
 
     if len(arguments) == 3:
         if symbol_table.get_type_by_index(arguments[0]) == "CONST" or symbol_table.get_type_by_index(
                 arguments[0]) == "VARIABLE":
+            symbol_table.raise_if_not_initialized_by_index(arguments[0])
             load_var_from_id_to_reg(left_reg, arguments[0])  # now in left_reg should be value of arguments[0]
 
         if symbol_table.get_type_by_index(arguments[0]) == "ARRAY":
@@ -192,18 +195,23 @@ def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
                 load_var_from_offset_to_reg(left_reg, offset)
 
             if symbol_table.get_type_by_index(arguments[1]) == "VARIABLE":
+                symbol_table.raise_if_not_initialized_by_index(arguments[1])
                 load_var_from_array_with_variable_to_reg(left_reg, arguments[0], arguments[1])
 
         if symbol_table.get_type_by_index(arguments[1]) == "ARRAY":
             if symbol_table.get_type_by_index(arguments[2]) == "CONST":
                 offset = get_offset_from_array(arguments[1], arguments[2])
                 load_var_from_offset_to_reg(right_reg, offset)
+                return # it must be here cause otherwise this case falls inside another big if
 
             if symbol_table.get_type_by_index(arguments[2]) == "VARIABLE":
+                symbol_table.raise_if_not_initialized_by_index(arguments[2])
                 load_var_from_array_with_variable_to_reg(right_reg, arguments[1], arguments[2])
+                return # it must be here cause otherwise this case falls inside another big if
 
         if symbol_table.get_type_by_index(arguments[2]) == "CONST" or symbol_table.get_type_by_index(
                 arguments[2]) == "VARIABLE":
+            symbol_table.raise_if_not_initialized_by_index(arguments[2])
             load_var_from_id_to_reg(right_reg, arguments[2])  # now in right_reg should be value of arguments[2]
 
     if len(arguments) == 4:
@@ -213,6 +221,7 @@ def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
                 load_var_from_offset_to_reg(left_reg, offset)
 
             if symbol_table.get_type_by_index(arguments[1]) == "VARIABLE":
+                symbol_table.raise_if_not_initialized_by_index(arguments[1])
                 load_var_from_array_with_variable_to_reg(left_reg, arguments[0], arguments[1])
 
         if symbol_table.get_type_by_index(arguments[2]) == "ARRAY":
@@ -221,6 +230,7 @@ def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
                 load_var_from_offset_to_reg(right_reg, offset)
 
             if symbol_table.get_type_by_index(arguments[3]) == "VARIABLE":
+                symbol_table.raise_if_not_initialized_by_index(arguments[3])
                 load_var_from_array_with_variable_to_reg(right_reg, arguments[2], arguments[3])
 
 
@@ -445,11 +455,14 @@ def translate_to_asm():
                     left_offset = symbol_table.get_offset_by_index(code_command.args[0])
                     smart_copy(left_offset, 0)
 
+                    symbol_table.initialize_by_index(copy_arguments[0])
+
             elif len(copy_arguments) == 2 and symbol_table.get_type_by_index(
                     copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
                 copy_arguments[1]) == "CONST":  # tab(2) := [operacja]:
                 left_offset = get_offset_from_array(copy_arguments[0], copy_arguments[1])
                 smart_copy(left_offset, 0)
+
             elif len(copy_arguments) == 2 and symbol_table.get_type_by_index(
                     copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
                 copy_arguments[1]) == "VARIABLE":  # tab(x) := [operacja]
@@ -480,13 +493,20 @@ def translate_to_asm():
                 generate_const_in_reg(left_reg, left_offset)
                 assembler_generator.add_asm_two_reg("STORE", right_reg, left_reg)
 
+                symbol_table.initialize_by_index(copy_arguments[0])
+
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "VARIABLE" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "VARIABLE":
                 # x := y
+
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[1])
+
                 left_offset = symbol_table.get_offset_by_index(code_command.args[0])
                 right_offset = symbol_table.dict[code_command.args[1]][5]
 
                 smart_copy(left_offset, right_offset)
+
+                symbol_table.initialize_by_index(copy_arguments[0])
 
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "VARIABLE" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "ARRAY" and symbol_table.get_type_by_index(copy_arguments[2]) == "CONST":
@@ -496,9 +516,15 @@ def translate_to_asm():
 
                 smart_copy(left_offset, right_offset)
 
+                symbol_table.initialize_by_index(copy_arguments[0])
+
+
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "VARIABLE" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "ARRAY" and symbol_table.get_type_by_index(copy_arguments[2]) == "VARIABLE":
                 # x := p(y)
+
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[2])
+
                 left_offset = symbol_table.get_offset_by_index(code_command.args[0])
 
                 # variable = symbol_table.dict[copy_arguments[2]]
@@ -517,6 +543,8 @@ def translate_to_asm():
 
                 assembler_generator.add_asm_two_reg("STORE", "c", left_reg)
 
+                symbol_table.initialize_by_index(copy_arguments[0])
+
             #### arrays ####
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "CONST" and symbol_table.get_type_by_index(copy_arguments[2]) == "CONST":
@@ -532,6 +560,8 @@ def translate_to_asm():
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "CONST" and symbol_table.get_type_by_index(copy_arguments[2]) == "VARIABLE":
                 # p(3) := x
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[2])
+
                 left_offset = get_offset_from_array(copy_arguments[0], copy_arguments[1])
                 left_reg = "b"
                 generate_const_in_reg(left_reg, left_offset)
@@ -556,6 +586,9 @@ def translate_to_asm():
                     copy_arguments[1]) == "CONST" and symbol_table.get_type_by_index(
                 copy_arguments[2]) == "ARRAY" and symbol_table.get_type_by_index(copy_arguments[3]) == "VARIABLE":
                 # p(3) := tab(x)
+
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[3])
+
                 left_offset = get_offset_from_array(copy_arguments[0], copy_arguments[1])
 
                 array = symbol_table.dict[copy_arguments[2]]
@@ -576,6 +609,9 @@ def translate_to_asm():
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "VARIABLE" and symbol_table.get_type_by_index(copy_arguments[2]) == "CONST":
                 # p(x) := 3
+
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[1])
+
                 array = symbol_table.dict[copy_arguments[0]]
                 load_var_from_id_to_reg("c", copy_arguments[1])
 
@@ -593,7 +629,10 @@ def translate_to_asm():
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "VARIABLE" and symbol_table.get_type_by_index(
                 copy_arguments[2]) == "VARIABLE":
-                # p(x) := x
+                # p(x) := y
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[1])
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[2])
+
                 array = symbol_table.dict[copy_arguments[0]]
                 load_var_from_id_to_reg("c", copy_arguments[1])
 
@@ -612,6 +651,8 @@ def translate_to_asm():
                 copy_arguments[2]) == "ARRAY" and symbol_table.get_type_by_index(
                 copy_arguments[3]) == "CONST":
                 # p(x) = p(2)
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[1])
+
                 array = symbol_table.dict[copy_arguments[0]]
                 load_var_from_id_to_reg("c", copy_arguments[1])
 
@@ -632,6 +673,9 @@ def translate_to_asm():
                 copy_arguments[2]) == "ARRAY" and symbol_table.get_type_by_index(
                 copy_arguments[3]) == "VARIABLE":
                 # p(x) = p(y)
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[1])
+
+                symbol_table.raise_if_not_initialized_by_index(copy_arguments[3])
 
                 array = symbol_table.dict[copy_arguments[0]]
                 load_var_from_id_to_reg("c", copy_arguments[1])
@@ -680,10 +724,15 @@ def translate_to_asm():
             generate_const_in_reg("d", offset)
             assembler_generator.add_asm_two_reg("STORE", "e", "d")
 
+            """To forget iterator after loop"""
+        if (code_command.type == "CODE_INC" or code_command.type == "CODE_DEC") and next_command.type == "CODE_DEC":
+            symbol_table.uninitialize_by_index(code_command.args[0])
+            symbol_table.uninitialize_by_index(next_command.args[0])
 
-        # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
         elif code_command.type == "CODE_WRITE":
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
+                symbol_table.raise_if_not_initialized_by_index(code_command.args[0])
+
                 index = code_command.args[0]
                 offset = symbol_table.get_offset_by_index(index)
 
@@ -725,6 +774,8 @@ def translate_to_asm():
 
         elif code_command.type == "CODE_READ":
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
+                symbol_table.initialize_by_index(code_command.args[0])
+
                 index = code_command.args[0]
                 offset = symbol_table.get_offset_by_index(index)
 
@@ -742,6 +793,8 @@ def translate_to_asm():
 
             if symbol_table.get_type_by_index(code_command.args[0]) == "ARRAY" and symbol_table.get_type_by_index(
                     code_command.args[1]) == "VARIABLE":
+                symbol_table.raise_if_not_initialized_by_index(code_command.args[1])
+
                 array = symbol_table.dict[code_command.args[0]]
                 load_var_from_id_to_reg("c", code_command.args[1])
 
@@ -756,11 +809,21 @@ def translate_to_asm():
             assembler_generator.asm_commands.append(assemblerCommand("HALT"))
 
 
-symbol_table.show()
+# symbol_table.show()
+# print(symbol_table.declaration_sack)
+symbol_table.check_declaration_sack()
+
 save_all_consts_to_memory()
 translate_to_asm()
 assembler_generator.leap_of_faith_fixer()
-print(assembler_generator)
+# symbol_table.show()
+#
+# file = open(sys.argv[2], 'w')
+# file.write(str(assembler_generator))
+
+# print(assembler_generator)
+
+
 
 with open('/home/gabriel/Desktop/first.txt', 'w') as f:
     print(assembler_generator, file=f)
