@@ -131,10 +131,12 @@ def p_declarations(p):
 
     if len(p) == 4:
         set_variable_in_declaration(p[3])
+        symbol_table.add_to_declaration_sack(p[3])
     elif len(p) == 9:
         set_array(p[3], p[5], p[7])
     elif len(p) == 2:
         set_variable_in_declaration(p[1])
+        symbol_table.add_to_declaration_sack(p[1])
     elif len(p) == 7:
         set_array(p[1], p[3], p[5])
 
@@ -142,17 +144,12 @@ def p_declarations(p):
 def p_commands(p):
     """commands :
                 | commands command """
-    #  | commands """
 
     # TODO possible bug, maybe his way?
     if len(p) == 3:
         p[0] = add_command(p[1], p[2])
     elif len(p) == 1:
         p[0] = create_empty_command("COM_COMMANDS")
-        # print(p[0], p[1])
-        # command = p[1]
-        # p[0].commands.append(Command("COM_COMMANDS"))  # ?
-        # p[0] = add_command(p[1], Command("COM_COMMANDS"))
 
 
 def p_command(p):
@@ -178,15 +175,17 @@ def p_command(p):
         p[0] = create_parent_command("COM_REPEAT", p[2], p[4])
     elif p[1] == "FOR" and p[5] == "TO":
         set_variable(p[2])
-        set_variable(p[2] + "_fake_iter")
+        set_variable(p[2] + "_FAKE_iter")
+        symbol_table.add_to_declaration_sack(p[2])
         p[0] = create_parent_command("COM_FOR", create_value_command("COM_PID", p[2]),
-                                     create_value_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6],
+                                     create_value_command("COM_PID", p[2] + "_FAKE_iter"), p[4], p[6],
                                      p[8])  # TODO maybe fake iter name should be something like '9i'
+
     elif p[1] == "FOR" and p[5] == "DOWNTO":
         set_variable(p[2])
-        set_variable(p[2] + "_fake_iter")
+        set_variable(p[2] + "_FAKE_iter")
         p[0] = create_parent_command("COM_FORDOWN", create_value_command("COM_PID", p[2]),
-                                     create_value_command("COM_PID", p[2] + "_fake_iter"), p[4], p[6], p[8])
+                                     create_value_command("COM_PID", p[2] + "_FAKE_iter"), p[4], p[6], p[8])
     elif p[1] == "READ":
         p[0] = create_parent_command("COM_READ", p[2])
     elif p[1] == "WRITE":

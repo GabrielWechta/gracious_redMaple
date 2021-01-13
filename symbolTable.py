@@ -5,6 +5,7 @@ class SymbolTable:
         self.dict = {}
         self.local_index = 0
         self.offset_pointer = 1
+        self.declaration_sack = []
 
     def add(self, name, symbol_type, value=None, begin=None, end=None, initialized=False):
         self.dict[self.local_index] = [name, symbol_type, value, begin, end, self.offset_pointer, initialized]
@@ -55,6 +56,16 @@ class SymbolTable:
         if self.dict[index][6] == False:
             print(f"{self.dict[index][0]} is not initialized", file=sys.stderr)
             raise Exception
+
+    def add_to_declaration_sack(self, name):
+        self.declaration_sack.append(name)
+
+    def check_declaration_sack(self):
+        for key, value in self.dict.items():
+            if value[1] == "VARIABLE" and not value[0].endswith("_FAKE_iter"):
+                if value[0] not in self.declaration_sack:
+                    print(f"{value[0]} was not declared.", file=sys.stderr)
+                    raise Exception
 
 
     def show(self):

@@ -384,14 +384,13 @@ def catch_errors(code):
 
 file = open(sys.argv[1], 'r')
 easy = file.read()
-print(easy)
-
+# print(easy)
 result = parser.parse(easy)
 
 intermediate = transfer_tree_to_code(result)
 intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
 catch_errors(intermediate)
 
-print(intermediate)
+# print(intermediate)
 
 

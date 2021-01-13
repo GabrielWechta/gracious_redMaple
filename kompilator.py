@@ -78,7 +78,7 @@ class assemblerGenerator:
                 #     words[-2] = str(int(words[-2]) - 1)
                 self.asm_commands[i].args = " ".join(words)
 
-        print(labels_addresses)
+        # print(labels_addresses)
 
 
 assembler_generator = assemblerGenerator()
@@ -810,16 +810,19 @@ def translate_to_asm():
             assembler_generator.asm_commands.append(assemblerCommand("HALT"))
 
 
-symbol_table.show()
+# symbol_table.show()
+# print(symbol_table.declaration_sack)
+symbol_table.check_declaration_sack()
+
 save_all_consts_to_memory()
 translate_to_asm()
 assembler_generator.leap_of_faith_fixer()
-symbol_table.show()
+# symbol_table.show()
 
-file = open(sys.argv[2], 'w')
-file.write(str(assembler_generator))
+# file = open(sys.argv[2], 'w')
+# file.write(str(assembler_generator))
 
-print(assembler_generator)
+# print(assembler_generator)
 
 
 
