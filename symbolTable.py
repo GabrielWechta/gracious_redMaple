@@ -11,7 +11,6 @@ class SymbolTable:
         self.dict[self.local_index] = [name, symbol_type, value, begin, end, self.offset_pointer, initialized]
 
         if symbol_type == "ARRAY":
-            # TODO czy to +1 jest ok?!
             self.offset_pointer += end - begin + 1
         else:
             self.offset_pointer += 1

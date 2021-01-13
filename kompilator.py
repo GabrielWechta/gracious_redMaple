@@ -143,13 +143,13 @@ def load_var_from_offset_to_reg(register, offset):
     assembler_generator.add_asm_two_reg("LOAD", register, register)
 
 def load_var_from_array_with_variable_to_reg(register, array_id, variable_id):
-    """registers e and f are used here!!!"""
+    """registers d and f are used here!!!"""
     array = symbol_table.dict[array_id]
 
     load_var_from_id_to_reg(register, variable_id)
-    generate_const_in_reg("e", array[3])
+    generate_const_in_reg("c", array[3])
     generate_const_in_reg("f", array[5])
-    assembler_generator.add_asm_two_reg("SUB", register, "e")
+    assembler_generator.add_asm_two_reg("SUB", register, "c")
     assembler_generator.add_asm_two_reg("ADD", register, "f")
     assembler_generator.add_asm_two_reg("LOAD", register, register)  # now in register should be wanted array field
 
@@ -729,7 +729,6 @@ def translate_to_asm():
             symbol_table.uninitialize_by_index(code_command.args[0])
             symbol_table.uninitialize_by_index(next_command.args[0])
 
-        # TODO READ and WRITE should be change to print const and not place in memory, but do it after everything works
         elif code_command.type == "CODE_WRITE":
             if symbol_table.get_type_by_index(code_command.args[0]) == "VARIABLE":
                 symbol_table.raise_if_not_initialized_by_index(code_command.args[0])
@@ -818,7 +817,7 @@ save_all_consts_to_memory()
 translate_to_asm()
 assembler_generator.leap_of_faith_fixer()
 # symbol_table.show()
-
+#
 # file = open(sys.argv[2], 'w')
 # file.write(str(assembler_generator))
 

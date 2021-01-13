@@ -236,7 +236,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_ITER_SUB")
         transform_tree_r(command.commands[1])
-        # transform_tree_r(command.commands[1]) # TODO is it necessary?
+        # transform_tree_r(command.commands[1]) # is it necessary?
         transform_tree_r(command.commands[2])
 
         code_program.add_label(label_start)
@@ -382,8 +382,44 @@ def catch_errors(code):
 
 """ Parsing and intermediate code generating. """
 
-file = open(sys.argv[1], 'r')
-easy = file.read()
+# file = open(sys.argv[1], 'r')
+# easy = file.read()
+easy = """
+DECLARE
+	n, _r, r_, j, k, d, c, ta(0:24), tb(100:124), tc(999900:999924)
+BEGIN
+	n := 25 - 1;
+	c := n * 5; [ c = 120 ]
+	c := 5 + c; [ c = 125 ]
+	c := c - 1; [ c = 124 ]
+	n := 25 - 1;        [       n = 24     ]
+    _r := n + 999876;   [      _r = 999900 ]
+    r_ := _r + n;       [      r_ = 999924 ]
+	tc(_r) := n;        [  tc(_r) = 24     ]
+	tc(r_) := n - n;    [  tc(r_) = 0   ] 
+
+    FOR i FROM tc(_r) DOWNTO tc(r_) DO  [ i from 24 to 0 ]
+		ta(i) := i;
+            j := c - i;                 [ j from 100 to 124 <- j := 124 - i ]
+		tb(j) := c - j;                 [ c - j = c - (c - i) = i ]
+	ENDFOR
+	[ ta = (0,1,2,...,23,24) ]
+	[ tb = (24,23,...,2,1,0) ] 
+	
+	d := 999800;
+	FOR i FROM tc(r_) TO tc(_r) DO  [ i from      0 to     24 ]
+        j := 100 + i;               [ j from    100 to    124 <- j :=    100 + i ]
+        k := d + j;                 [ k from 999900 to 999924 <- k := 999800 + j ] 
+		tc(k) := ta(i) * tb(j);
+	ENDFOR
+	[ tc = (0,23,44,...,143,144,143,...,44,23,0) ]
+
+	FOR i FROM _r TO r_ DO
+		WRITE tc(i);
+	ENDFOR
+
+END
+"""
 # print(easy)
 result = parser.parse(easy)
 
