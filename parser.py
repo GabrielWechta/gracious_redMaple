@@ -286,11 +286,4 @@ def p_error(t):
     print("Syntax error at '%s'" % t.value)
     sys.exit()
 
-
-#    try:
-#        print("Syntax error at '%s'" % t.value)
-#        raise Exception
-#    except:
-#       pass # malicious things happen when syntax error is approached.
-
 parser = yacc.yacc()
