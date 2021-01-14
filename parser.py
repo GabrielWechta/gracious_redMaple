@@ -1,3 +1,4 @@
+""" Parser for jftt compiler, here on the other hand fancy stuff start to happen. """
 import sys
 
 import ply.yacc as yacc
@@ -21,14 +22,19 @@ def create_program(commands: Command):
 
 
 def set_variable_in_declaration(name):
+    """ Function for declaring variables inside DECLARE field. It's special cause it throws exception when same variable is
+        being declared twice. """
     if symbol_table.get_symbol_by_name(name) is not None:
         print(f"Double {name} variable declaration", file=sys.stderr)
-        raise Exception
+        sys.exit() # in this case we programs stops
     else:
         symbol_table.add(name, "VARIABLE")
 
 
 def set_variable(name):
+    """ Function for adding everything approached by parser to symbol table.
+        checking if all variables used in program where declared happens in
+        symbol_table.check_declaration_sack() """
     if symbol_table.get_symbol_by_name(name) is not None:
         return
     else:
@@ -69,8 +75,8 @@ def create_value_command(command_type, name):
     index = symbol_table.get(name)
 
     if index is None:
-        print(f"Variable {name} was not declared.")
-        raise Exception
+        print(f"Variable {name} was not declared.", file=sys.stderr)
+        sys.exit()
     else:
         value_command = Command(command_type, index)
 
@@ -84,8 +90,8 @@ def create_iterator_command(command_type, name):
         return
 
     if index is not None and symbol_table.dict[index][1] != "ITERATOR":
-        print(f"Iterator {name} was declared as VAR or ARR before.")
-        raise Exception
+        print(f"Iterator {name} was declared as VAR or ARR before.", file=sys.stderr)
+        sys.exit()
 
     elif index is not None and symbol_table.dict[index][1] == "ITERATOR":
         new_index = symbol_table.get(name)
@@ -260,7 +266,7 @@ def p_identifier_pidentifier(p):
         set_variable(p[3])
         if symbol_table.get_symbol_by_name(p[1])[1] != "ARRAY":
             print(f"{p[1]} is not array.", file=sys.stderr)
-            raise Exception
+            sys.exit()
         p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
                                      create_value_command("COM_PID", p[3]))
 
@@ -269,7 +275,7 @@ def p_identifier_num(p):
     """identifier   : PIDENTIFIER LPAREN NUM RPAREN"""
     if symbol_table.get_symbol_by_name(p[1])[1] != "ARRAY":
         print(f"{p[1]} is not array.", file=sys.stderr)
-        raise Exception
+        sys.exit()
     if symbol_table.get(str(p[3])) is None:
         set_const(str(p[3]))
     p[0] = create_parent_command("COM_ARR", create_value_command("COM_PID", p[1]),
@@ -279,8 +285,8 @@ def p_identifier_num(p):
 def p_error(t):
     try:
         print("Syntax error at '%s'" % t.value)
+        sys.exit()
     except:
-        pass
-
+        pass # malicious things happen when syntax error is approached.
 
 parser = yacc.yacc()

@@ -1,10 +1,11 @@
+""" This is AST -> intermediate translation """
 import sys
 
-from parser import Command, parser, symbol_table
+from parser import Command, parser, symbol_table # this import is important, even if symbol_table is not used in this program
 
 
 class codeCommand:
-    def __init__(self, cc_type: str, args=None, block=None):
+    def __init__(self, cc_type: str, block=None):
         self.type = cc_type
         self.args = []
         self.block = block
@@ -70,7 +71,7 @@ code_program = codeProgram()
 
 
 def transform_tree_r(command: Command):
-    if not command:  # to check
+    if not command:  # ending recursion
         return
 
     if command.type == "COM_ASSGNOP":
@@ -146,7 +147,7 @@ def transform_tree_r(command: Command):
 
         code_program.add_code_command("CODE_UNKNOWN")
         code_program.add_arg_to_current_command(label_else)
-        code_program.add_arg_to_current_command(-1)  # ?
+        code_program.add_arg_to_current_command(-1)  # separation
         transform_tree_r(command.commands[0])
 
         if code_program.bad_inequality():
@@ -175,7 +176,7 @@ def transform_tree_r(command: Command):
         code_program.add_label(label_start)
         code_program.add_code_command("CODE_UNKNOWN")
         code_program.add_arg_to_current_command(label_tmp)
-        code_program.add_arg_to_current_command(-1)  # ?
+        code_program.add_arg_to_current_command(-1)  # separation
         transform_tree_r(command.commands[0])
 
         if code_program.bad_inequality():
@@ -219,7 +220,8 @@ def transform_tree_r(command: Command):
         label_exit = code_program.label
         code_program.label += 1
 
-        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[3].index:
+        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[
+            3].index:
             print("Incorrect FOR loop.", file=sys.stderr)
             raise Exception
 
@@ -265,7 +267,8 @@ def transform_tree_r(command: Command):
         label_exit = code_program.label
         code_program.label += 1
 
-        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[3].index:
+        if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[
+            3].index:
             print("Incorrect FOR loop.", file=sys.stderr)
             raise Exception
 
@@ -357,12 +360,14 @@ def transfer_tree_to_code(program: Command):
     transform_tree_r(program)
     return code_program
 
+
 def catch_errors(code):
-    """ For now this function only catches changing iterator inside both FOR loops. """
+    """ For now this function only catches changing iterator error inside both FOR loops. """
     check = False
     iterator_index = -1
     label_count = 0
-    for code_command, next_command, last_command in zip(code.code_commands, code.code_commands[1:], code.code_commands[2:]):
+    for code_command, next_command, last_command in zip(code.code_commands, code.code_commands[1:],
+                                                        code.code_commands[2:]):
 
         if code_command.type == "CODE_COPY" and next_command.type == "CODE_COPY" and last_command.type == "CODE_INC":
             iterator_index = code_command.args[0]
@@ -380,53 +385,17 @@ def catch_errors(code):
             print("Iterator modification inside loop", file=sys.stderr)
             raise Exception
 
+
 """ Parsing and intermediate code generating. """
 
-# file = open(sys.argv[1], 'r')
-# easy = file.read()
-easy = """
-DECLARE
-	n, _r, r_, j, k, d, c, ta(0:24), tb(100:124), tc(999900:999924)
-BEGIN
-	n := 25 - 1;
-	c := n * 5; [ c = 120 ]
-	c := 5 + c; [ c = 125 ]
-	c := c - 1; [ c = 124 ]
-	n := 25 - 1;        [       n = 24     ]
-    _r := n + 999876;   [      _r = 999900 ]
-    r_ := _r + n;       [      r_ = 999924 ]
-	tc(_r) := n;        [  tc(_r) = 24     ]
-	tc(r_) := n - n;    [  tc(r_) = 0   ] 
+file = open(sys.argv[1], 'r')  # reading from file, for debugging you can overwrite easy.
+easy = file.read()
 
-    FOR i FROM tc(_r) DOWNTO tc(r_) DO  [ i from 24 to 0 ]
-		ta(i) := i;
-            j := c - i;                 [ j from 100 to 124 <- j := 124 - i ]
-		tb(j) := c - j;                 [ c - j = c - (c - i) = i ]
-	ENDFOR
-	[ ta = (0,1,2,...,23,24) ]
-	[ tb = (24,23,...,2,1,0) ] 
-	
-	d := 999800;
-	FOR i FROM tc(r_) TO tc(_r) DO  [ i from      0 to     24 ]
-        j := 100 + i;               [ j from    100 to    124 <- j :=    100 + i ]
-        k := d + j;                 [ k from 999900 to 999924 <- k := 999800 + j ] 
-		tc(k) := ta(i) * tb(j);
-	ENDFOR
-	[ tc = (0,23,44,...,143,144,143,...,44,23,0) ]
+result = parser.parse(easy)  # Abstract Syntax Tree
 
-	FOR i FROM _r TO r_ DO
-		WRITE tc(i);
-	ENDFOR
-
-END
-"""
-# print(easy)
-result = parser.parse(easy)
-
-intermediate = transfer_tree_to_code(result)
-intermediate.code_commands.append(codeCommand("EOFCOMMANDS"))
-catch_errors(intermediate)
+intermediate = transfer_tree_to_code(result)  # now it is intermediate code
+intermediate.code_commands.append(codeCommand(
+    "EOFCOMMANDS"))  # in kompilator, when this is seen it means that everything is fine, and HALT should be put here.
+catch_errors(intermediate) # this is check on intermediate code for some errors that can be caught now.
 
 # print(intermediate)
-
-

@@ -1,9 +1,15 @@
+""" This is compiler. Behold. It de facto produces assembly like code for maszyna_wirtualna by PhD Gebala.
+    All about this assembly code can be checked out on my repo.
+    It uses intermediate code from codGenerator.
+    """
 import sys
 
 from codeGenerator import symbol_table, intermediate
 
 
 class assemblerCommand:
+    """ Structure for simpler arguments handling. """
+
     def __init__(self, ac_type, *args):
         self.type = ac_type
         self.args = ""
@@ -25,6 +31,8 @@ class assemblerGenerator:
 
         return table
 
+    """ FUNCTIONS FOR ADDING DIRECT ASSEM INSTRUCTIONS """
+
     def add_asm_two_reg(self, ac_type, reg1, reg2):
         ac = assemblerCommand(ac_type, reg1, reg2)
         self.asm_commands.append(ac)
@@ -41,6 +49,8 @@ class assemblerGenerator:
         ac = assemblerCommand(ac_type, str(dest))
         self.asm_commands.append(ac)
 
+    """ FUNCTIONS FOR HANDLING JUMPS """
+
     def add_leap_of_faith_jump(self, ac_type, label_id):
         ac = assemblerCommand(ac_type, "find:" + str(label_id))
         self.asm_commands.append(ac)
@@ -56,7 +66,8 @@ class assemblerGenerator:
         self.asm_commands.append(comment)
 
     def leap_of_faith_fixer(self):
-        """Both this function's idea and this function's code is a big leap of faith"""
+        """ Both this function's idea and this function's code is a big leap of faith.
+            It replaces here:n and find:n - where n is number, to get relative jump distance."""
         labels_addresses = {}
         address = 1
         i = 0
@@ -73,18 +84,17 @@ class assemblerGenerator:
         for i, command in enumerate(self.asm_commands):
             words = command.args.split(" ")
             if len(words) >= 2 and "find:" in words[-2]:
-                words[-2] = str(labels_addresses[words[-2].split(":")[1]] - (i + 1))
-                # if int(words[-2]) < 0:
-                #     words[-2] = str(int(words[-2]) - 1)
+                words[-2] = str(labels_addresses[words[-2].split(":")[1]] - (i + 1))  # Ladies, gentlemen - python
                 self.asm_commands[i].args = " ".join(words)
 
-        # print(labels_addresses)
+        # print(labels_addresses)  # for debugging
 
 
 assembler_generator = assemblerGenerator()
 
 
 def generate_const_in_reg(reg, const):
+    """ In my implementation basic way to get known value in register, it uses smart ways (adding and shifts) to do that. """
     # assembler_generator.add_comment(f"# starting generating const {const}")
     assembler_generator.add_asm_one_reg("RESET", reg)
     if const == 0:
@@ -114,17 +124,18 @@ def smart_copy(left_offset, right_offset):
     right_reg = "b"
     generate_const_in_reg(right_reg, right_offset)
     assembler_generator.add_asm_two_reg("LOAD", right_reg,
-                                        right_reg)  # wczytanie do right_reg wartosci spod adresu right_reg
+                                        right_reg)  # load to right_reg value from address(right_reg)
 
     left_reg = "a"
 
-    generate_const_in_reg(left_reg, left_offset)  # wygenerowanie w left_reg adresu poadanego jako left_offest
+    generate_const_in_reg(left_reg, left_offset)  # generate in left_reg value equal to left_offset
     assembler_generator.add_asm_two_reg("STORE", right_reg,
-                                        left_reg)  # zapisanie pod adres left_offset wartosci z right_offset
+                                        left_reg)  # saving to left_offset value from right_offset
     # assembler_generator.add_comment("# after smart copsy")
 
 
-def save_all_consts_to_memory():  # to dla lepszego korzystania z load_all_kinds_to_regs
+def save_all_consts_to_memory():
+    """ This is big and bad idea but makes code simpler. Especially in load_all_kinds_to_regs. """
     for key, value in symbol_table.dict.items():
         if value[2] is not None:
             save_to_memory("a", "b", value[5], value[2])
@@ -135,15 +146,17 @@ def load_var_from_id_to_reg(register, symbol_id):
     variable_offset = symbol_table.get_offset_by_index(symbol_id)
     generate_const_in_reg(register, variable_offset)
     assembler_generator.add_asm_two_reg("LOAD", register,
-                                        register)  # wczytanie do register wartosci spod adresu register
+                                        register)  # load to register value from address register
 
 
 def load_var_from_offset_to_reg(register, offset):
     generate_const_in_reg(register, offset)
     assembler_generator.add_asm_two_reg("LOAD", register, register)
 
+
 def load_var_from_array_with_variable_to_reg(register, array_id, variable_id):
-    """registers d and f are used here!!!"""
+    """ Registers c and f are used here!!!
+        This is used for loading to memory array element that is being get by variable ( tab(x) )"""
     array = symbol_table.dict[array_id]
 
     load_var_from_id_to_reg(register, variable_id)
@@ -161,16 +174,15 @@ def get_offset_from_array(array_id, parameter_id):
         return array[5] + (parameter[2] - array[3])  # returns relative memory position from array
 
 
-
 def copy_reg_value_to_reg(reg_to, reg_from):
-    """THIS FUNCTION USES REGISTER a !!!"""
+    """ Register a is used here!!!"""
     assembler_generator.add_asm_one_reg("RESET", "a")  # offset = 0 is save place (I hope)
     assembler_generator.add_asm_two_reg("STORE", reg_from, "a")
     assembler_generator.add_asm_two_reg("LOAD", reg_to, "a")
 
 
 def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
-    """Loads value to left reg and value to right reg despite type of expression"""
+    """ Loads value to left reg and value to right reg despite type of expression. """
     arguments = arguments[0]  # getting list from tuple
     if len(arguments) == 2:
         if symbol_table.get_type_by_index(arguments[0]) == "CONST" or symbol_table.get_type_by_index(
@@ -202,12 +214,12 @@ def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
             if symbol_table.get_type_by_index(arguments[2]) == "CONST":
                 offset = get_offset_from_array(arguments[1], arguments[2])
                 load_var_from_offset_to_reg(right_reg, offset)
-                return # it must be here cause otherwise this case falls inside another big if
+                return  # it must be here cause otherwise this case falls inside another big if
 
             if symbol_table.get_type_by_index(arguments[2]) == "VARIABLE":
                 symbol_table.raise_if_not_initialized_by_index(arguments[2])
                 load_var_from_array_with_variable_to_reg(right_reg, arguments[1], arguments[2])
-                return # it must be here cause otherwise this case falls inside another big if
+                return  # it must be here cause otherwise this case falls inside another big if
 
         if symbol_table.get_type_by_index(arguments[2]) == "CONST" or symbol_table.get_type_by_index(
                 arguments[2]) == "VARIABLE":
@@ -255,30 +267,23 @@ def translate_to_asm():
         if next_command.type == "CODE_ADD":
             load_all_kinds_to_regs("a", "b", next_command.args)
 
-            #### for testing #####
             assembler_generator.add_asm_two_reg("ADD", "a", "b")
 
             assembler_generator.add_asm_one_reg("RESET", "b")
             assembler_generator.add_asm_two_reg("STORE", "a", "b")  # safely saved in 0-offset for copy to pick it up.
-            """ for printing offset 0 do:"""
-            # assembler_generator.add_asm_one_reg("PUT", "b")
 
         if next_command.type == "CODE_SUB":
             load_all_kinds_to_regs("a", "b", next_command.args)
 
-            #### for testing #####
             assembler_generator.add_asm_two_reg("SUB", "a", "b")
 
             assembler_generator.add_asm_one_reg("RESET", "b")
             assembler_generator.add_asm_two_reg("STORE", "a", "b")  # safely saved in 0-offset for copy to pick it up.
-            """ for printing offset 0 do:"""
-            # assembler_generator.add_asm_one_reg("PUT", "b")
 
         if next_command.type == "CODE_MUL":
             load_all_kinds_to_regs("a", "b", next_command.args)
-            # TODO optimize chyba będzie lepiej jak a>b albo na odwrót
-            # TODO lewy i prawa to trudne rzeczy
-            #### MULTIPLYING #####
+
+            #### MULTIPLYING ALGORITHM #####
             assembler_generator.add_asm_one_reg("RESET", "c")
             assembler_generator.add_asm_reg_jump("JODD", "b", 2)
             assembler_generator.add_asm_jump("JUMP", 2)
@@ -290,8 +295,6 @@ def translate_to_asm():
 
             assembler_generator.add_asm_one_reg("RESET", "b")
             assembler_generator.add_asm_two_reg("STORE", "c", "b")  # safely saved in 0-offset for copy to pick it up.
-            """ for printing offset 0 do:"""
-            # assembler_generator.add_asm_one_reg("PUT", "b")
 
         if next_command.type == "CODE_DIV":
             load_all_kinds_to_regs("d", "c", next_command.args)
@@ -449,8 +452,10 @@ def translate_to_asm():
             assembler_generator.add_leap_of_faith_jump("JUMP", code_command.args[0])
 
         if code_command.type == "CODE_COPY":
+            """ The most pathological moment in the intermediate code. All cases that can happen 
+                are separately handled """
             copy_arguments = code_command.args
-            if len(copy_arguments) == 1:  # x:= [operacja]
+            if len(copy_arguments) == 1:  # x:= [operation]
                 if symbol_table.get_type_by_index(copy_arguments[0]) == "VARIABLE":
                     left_offset = symbol_table.get_offset_by_index(code_command.args[0])
                     smart_copy(left_offset, 0)
@@ -459,13 +464,13 @@ def translate_to_asm():
 
             elif len(copy_arguments) == 2 and symbol_table.get_type_by_index(
                     copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
-                copy_arguments[1]) == "CONST":  # tab(2) := [operacja]:
+                copy_arguments[1]) == "CONST":  # tab(2) := [operation]:
                 left_offset = get_offset_from_array(copy_arguments[0], copy_arguments[1])
                 smart_copy(left_offset, 0)
 
             elif len(copy_arguments) == 2 and symbol_table.get_type_by_index(
                     copy_arguments[0]) == "ARRAY" and symbol_table.get_type_by_index(
-                copy_arguments[1]) == "VARIABLE":  # tab(x) := [operacja]
+                copy_arguments[1]) == "VARIABLE":  # tab(x) := [operation]
                 array = symbol_table.dict[copy_arguments[0]]
                 load_var_from_id_to_reg("c", copy_arguments[1])
 
@@ -747,7 +752,7 @@ def translate_to_asm():
                 generate_const_in_reg(reg, offset)
                 assembler_generator.add_asm_one_reg("PUT", reg)
 
-                # """ FOR DEBUGGING !!!!"""
+                # """ FOR DEBUGGING """
                 # reg = "a"
                 # generate_const_in_reg(reg, symbol_table.dict[code_command.args[0]][2])
                 # assembler_generator.add_asm_one_reg("PUT", reg)
@@ -809,21 +814,19 @@ def translate_to_asm():
             assembler_generator.asm_commands.append(assemblerCommand("HALT"))
 
 
+""" TRANSLATING TO ASM """
+# commented parts will stay for debugging
+
 # symbol_table.show()
 # print(symbol_table.declaration_sack)
-symbol_table.check_declaration_sack()
 
-save_all_consts_to_memory()
-translate_to_asm()
-assembler_generator.leap_of_faith_fixer()
+symbol_table.check_declaration_sack()  # stops program if some other variables then declared were used in program
+
+save_all_consts_to_memory()  # saving all approached consts to memory, in there dedicated offsets
+translate_to_asm()  # this is happening here
+assembler_generator.leap_of_faith_fixer()  # fixing heres and finds added by JUMPs
+
 # symbol_table.show()
-#
-# file = open(sys.argv[2], 'w')
-# file.write(str(assembler_generator))
 
-# print(assembler_generator)
-
-
-
-with open('/home/gabriel/Desktop/first.txt', 'w') as f:
-    print(assembler_generator, file=f)
+file = open(sys.argv[2], 'w')  # saving to file
+file.write(str(assembler_generator))

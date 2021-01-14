@@ -1,4 +1,7 @@
-""" Lexer program for de_facto compiler """
+""" Lexer program for jftt compiler.
+    nothing fancy, everything as typical lexer.
+    """
+
 import ply.lex as lex
 
 # List of token names.
@@ -179,32 +182,5 @@ def t_error(t):
     t.lexer.skip(1)
 
 """ BUILDING LEXER """
-
-# Build the lexer
 lexer = lex.lex()
 
-if __name__ == "__main__":
-    # testing
-    data = """DECLARE
-        n,p
-    BEGIN
-        READ n;
-        REPEAT
-            p:=n/2;
-            p:=2*p;
-            IF n>=p THEN 
-                WRITE 1;
-            ELSE 
-                WRITE 0;
-            ENDIF
-            n:=n/2;
-        UNTIL n=0;
-    END
-    """
-
-    # Give the lexer some input
-    lexer.input(data)
-
-    # Tokenize
-    for tok in lexer:
-        print(tok)
