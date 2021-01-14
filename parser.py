@@ -26,7 +26,7 @@ def set_variable_in_declaration(name):
         being declared twice. """
     if symbol_table.get_symbol_by_name(name) is not None:
         print(f"Double {name} variable declaration", file=sys.stderr)
-        sys.exit() # in this case we programs stops
+        sys.exit()  # in this case we programs stops
     else:
         symbol_table.add(name, "VARIABLE")
 
@@ -47,8 +47,8 @@ def set_const(name):
 
 def set_array(name, begin, end):
     if begin > end:
-        print("WRONG BEGIN AND END")
-        return False
+        print(f"Wrong array {name} declaration.", file=sys.stderr)
+        sys.exit()
 
     symbol_table.add(name, "ARRAY", None, begin, end)
 
@@ -283,10 +283,14 @@ def p_identifier_num(p):
 
 
 def p_error(t):
-    try:
-        print("Syntax error at '%s'" % t.value)
-        sys.exit()
-    except:
-        pass # malicious things happen when syntax error is approached.
+    print("Syntax error at '%s'" % t.value)
+    sys.exit()
+
+
+#    try:
+#        print("Syntax error at '%s'" % t.value)
+#        raise Exception
+#    except:
+#       pass # malicious things happen when syntax error is approached.
 
 parser = yacc.yacc()

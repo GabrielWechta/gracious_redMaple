@@ -11,7 +11,7 @@ tokens = ("DECLARE", "BEGIN", "IF", "THEN", "ELSE", "ENDIF", "WHILE", "DO", "END
           "LPAREN", "RPAREN",
           "NOTEQUAL", "EQUAL", "LESSEREQUAL", "BIGGEREQUAL", "LESSER", "BIGGER",
           "NUM", "PIDENTIFIER",
-          "COMMA", "SEMICOLON", "COLON", "COMMENT"
+          "COMMA", "SEMICOLON", "COLON"
           )
 
 """ SIMPLE TOKENS """

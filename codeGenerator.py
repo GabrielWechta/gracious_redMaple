@@ -223,7 +223,7 @@ def transform_tree_r(command: Command):
         if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[
             3].index:
             print("Incorrect FOR loop.", file=sys.stderr)
-            raise Exception
+            sys.exit()
 
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
@@ -270,7 +270,7 @@ def transform_tree_r(command: Command):
         if command.commands[0].index == command.commands[2].index or command.commands[0].index == command.commands[
             3].index:
             print("Incorrect FOR loop.", file=sys.stderr)
-            raise Exception
+            sys.exit()
 
         code_program.add_code_command("CODE_COPY")
         transform_tree_r(command.commands[0])
@@ -383,7 +383,7 @@ def catch_errors(code):
 
         if code_command.type == "CODE_COPY" and check == True and code_command.args[0] == iterator_index:
             print("Iterator modification inside loop", file=sys.stderr)
-            raise Exception
+            sys.exit()
 
 
 """ Parsing and intermediate code generating. """
