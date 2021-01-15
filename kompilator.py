@@ -181,6 +181,13 @@ def copy_reg_value_to_reg(reg_to, reg_from):
     assembler_generator.add_asm_two_reg("LOAD", reg_to, "a")
 
 
+def copy_reg_value_to_reg_in_mult(reg_to, reg_from):
+    """ Register f is used here!!!"""
+    assembler_generator.add_asm_one_reg("RESET", "f")  # offset = 0 is save place (I hope)
+    assembler_generator.add_asm_two_reg("STORE", reg_from, "f")
+    assembler_generator.add_asm_two_reg("LOAD", reg_to, "f")
+
+
 def load_all_kinds_to_regs(left_reg, right_reg, *arguments):
     """ Loads value to left reg and value to right reg despite type of expression. """
     arguments = arguments[0]  # getting list from tuple
@@ -282,8 +289,16 @@ def translate_to_asm():
 
         if next_command.type == "CODE_MUL":
             load_all_kinds_to_regs("a", "b", next_command.args)
+            copy_reg_value_to_reg_in_mult("e", "b")
 
-            #### MULTIPLYING ALGORITHM #####
+            #### CHANGE TO END UP WITH a > b ####
+            assembler_generator.add_asm_two_reg("SUB", "e", "a")
+            assembler_generator.add_asm_reg_jump("JZERO", "e", 10)
+            copy_reg_value_to_reg_in_mult("c", "a")
+            copy_reg_value_to_reg_in_mult("a", "b")
+            copy_reg_value_to_reg_in_mult("b", "c")
+
+            #### MULTIPLYING ALGORITHM ####
             assembler_generator.add_asm_one_reg("RESET", "c")
             assembler_generator.add_asm_reg_jump("JODD", "b", 2)
             assembler_generator.add_asm_jump("JUMP", 2)
@@ -512,6 +527,10 @@ def translate_to_asm():
                 smart_copy(left_offset, right_offset)
 
                 symbol_table.initialize_by_index(copy_arguments[0])
+
+            elif len(copy_arguments) < 3:
+                print(f"Wrong array usage.", file=sys.stderr)
+                sys.exit()
 
             elif symbol_table.get_type_by_index(copy_arguments[0]) == "VARIABLE" and symbol_table.get_type_by_index(
                     copy_arguments[1]) == "ARRAY" and symbol_table.get_type_by_index(copy_arguments[2]) == "CONST":
