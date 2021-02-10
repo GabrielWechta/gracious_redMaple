@@ -120,7 +120,6 @@ Ale dasz radę, serio. Tylko kup sobie kilo kawy.
 Moja implementacja w kategoriach wyniku na ocenianiu jest słaba. Między innymi dlatego, że:
 1. **\-** wszystkie stałe są zapisywane do pamięci, a nie ma takiej potrzeby, natomiast wtedy procedura wczytania do rejestrów wartości jest niezależna od typu, co znacznie ułatwia wygląd funckji wczytującej.
 2. **\-** wszystkie rejestry są wpisane z palca (XD), jako że na przykład w takim dzieleniu niezbędne jest 5 (chyba) rejestrów, a do operacji, w pierwszym miejscu, wczytania dzielnika i dzielnej do rejestrów potrzebne są 2, a razem mamy tylko 6, to aby uniknąć niespodziewanych błedóœ postanowiłem na sztywno je ustawiać co jest skrajnie nieoptymalne, ale spokój jest najcenniejszy.  
----
 
 Natomiast jeśli kończy ci się czas, żona ma termin za tydzień, albo nie masz pojęcia co zrobić i ogarnia cię panika, to są też zalety:
 3. **+** jest fantastyczny i prosty w użytkowaniu generator drzewa wyprowadzenia. Jest wpaniały bo od razu zamienia FOR'y na JUMP'y i wstawia labele, które następnie łatwo jest ponadpisywać aby odzyskać z nich adres względnego skoku.
