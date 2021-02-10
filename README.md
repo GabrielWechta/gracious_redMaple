@@ -122,9 +122,9 @@ Moja implementacja w kategoriach wyniku na ocenianiu jest słaba. Między innymi
 2. **\-** wszystkie rejestry są wpisane z palca (XD), jako że na przykład w takim dzieleniu niezbędne jest 5 (chyba) rejestrów, a do operacji, w pierwszym miejscu, wczytania dzielnika i dzielnej do rejestrów potrzebne są 2, a razem mamy tylko 6, to aby uniknąć niespodziewanych błedóœ postanowiłem na sztywno je ustawiać co jest skrajnie nieoptymalne, ale spokój jest najcenniejszy.  
 
 Natomiast jeśli kończy ci się czas, żona ma termin za tydzień, albo nie masz pojęcia co zrobić i ogarnia cię panika, to są też zalety:
-3. **+** jest fantastyczny i prosty w użytkowaniu generator drzewa wyprowadzenia. Jest wpaniały bo od razu zamienia FOR'y na JUMP'y i wstawia labele, które następnie łatwo jest ponadpisywać aby odzyskać z nich adres względnego skoku.
-4. **+** jest porządny symbol table, który w miarę rozsądnie sprawdza błędy.
-5. **+** błędnego użycia iteratora wewnątrz pętli nie można wykryć (u mnie) robiąc jeden przebieg. Na szczęście są dozwolone multi-przebiegi. Co jest realizowane łatwo w parserze.
+3. **\+** jest fantastyczny i prosty w użytkowaniu generator drzewa wyprowadzenia. Jest wpaniały bo od razu zamienia FOR'y na JUMP'y i wstawia labele, które następnie łatwo jest ponadpisywać aby odzyskać z nich adres względnego skoku.
+4. **\+** jest porządny symbol table, który w miarę rozsądnie sprawdza błędy.
+5. **\+** błędnego użycia iteratora wewnątrz pętli nie można wykryć (u mnie) robiąc jeden przebieg. Na szczęście są dozwolone multi-przebiegi. Co jest realizowane łatwo w parserze.
 
 Jeżeli zależy ci na ocenie, to spójrz jak robią to prosi:
 * https://github.com/quetzelcoatlus/PWr/tree/master/Semestr_5/Jezyki_Formalne_i_Techniki_Translacji_JFTT/Lista_4
